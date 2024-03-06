@@ -24,9 +24,11 @@ export const env = createEnv({
       ),
     GITHUB_CLIENT_ID: z.string().refine(
       (str) => !str.includes("YOUR_GITHUB_CLIENT_ID_HERE"),
+        "You forgot to set the GITHUB_CLIENT_ID in the .env file."
     ),
     GITHUB_CLIENT_SECRET: z.string().refine(
       (str) => !str.includes("YOUR_GITHUB_CLIENT_SECRET_HERE"),
+        "You forgot to set the GITHUB_CLIENT_SECRET in the .env file."
     ),
     NODE_ENV: z
       .enum(["development", "test", "production"])
