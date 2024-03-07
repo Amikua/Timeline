@@ -7,9 +7,10 @@ export default async function Page() {
 		return redirect("/");
 	}
 	return (
-		<>
-			<h1>Sign in</h1>
-			<a href="/login/github">Sign in with GitHub</a>
-		</>
+		<div className="w-full min-h-screen text-white flex flex-col justify-center items-center">
+			<div className="bg-zinc-900 w-48 h-20 flex justify-center items-center rounded-2xl">
+				<a href="/login/github" className="text-lg">Sign in with GitHub</a>
+			</div>
+		</div>
 	);
 }
