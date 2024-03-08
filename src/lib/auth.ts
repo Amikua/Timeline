@@ -22,6 +22,7 @@ export const lucia = new Lucia(adapter, {
       username: attributes.username,
       avatarUrl: attributes.avatarUrl,
       githubId: attributes.githubId,
+      email: attributes.email,
     };
   },
 });
@@ -64,7 +65,7 @@ export const validateRequest = cache(
           sessionCookie.attributes,
         );
       }
-    } catch {}
+    } catch { }
     return result;
   },
 );
