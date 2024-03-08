@@ -5,9 +5,10 @@ import { z } from 'zod'
 import { db } from "~/server/db";
 
 const githubUserValidation = z.object({
-    login: z.string(),
-    id: z.number(),
-    avatar_url: z.string(),
+	login: z.string(),
+	id: z.number(),
+	avatar_url: z.string(),
+	email: z.string().nullable().transform((v) => v ?? "Unknown email"),
 });
 
 
@@ -30,44 +31,56 @@ export async function GET(request: Request): Promise<Response> {
 			}
 		});
 
-        const githubUser = githubUserValidation.parse(await githubUserResponse.json());
 
-        const existingUser = await db.user.findFirst({
-            where: {
-                githubId: githubUser.id
-            }
-        })
+		const githubUser = githubUserValidation.parse(await githubUserResponse.json());
+
+		const existingUser = await db.user.findFirst({
+			where: {
+				githubId: githubUser.id
+			}
+		})
 
 		if (existingUser) {
+			await db.user.update({
+				where: {
+					id: existingUser.id
+				},
+				data: {
+					avatarUrl: githubUser.avatar_url,
+					email: githubUser.email,
+					username: githubUser.login
+				}
+			})
 			const session = await lucia.createSession(existingUser.id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 			return new Response(null, {
 				status: 302,
 				headers: {
-					Location: "/"
+					Location: "/dashboard"
 				}
 			});
 		}
 
-        const { id } = await db.user.create({
-            data: {
-                githubId: githubUser.id,
-                avatarUrl: githubUser.avatar_url,
-                username: githubUser.login
-            }
-        })
+		const { id } = await db.user.create({
+			data: {
+				githubId: githubUser.id,
+				avatarUrl: githubUser.avatar_url,
+				email: githubUser.email,
+				username: githubUser.login
+			}
+		})
 		const session = await lucia.createSession(id, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 		return new Response(null, {
 			status: 302,
 			headers: {
-				Location: "/"
+				Location: "/dashboard"
 			}
 		});
 	} catch (e) {
-        console.error(e)
+		console.error(e)
 		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
 			// invalid code
 			return new Response(null, {

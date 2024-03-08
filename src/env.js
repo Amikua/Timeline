@@ -14,14 +14,6 @@ export const env = createEnv({
         (str) => !str.includes("YOUR_POSTGRES_URL_HERE"),
         "You forgot to change the default URL"
       ),
-    // Url to db without polling
-    DIRECT_URL: z
-      .string()
-      .url()
-      .refine(
-        (str) => !str.includes("YOUR_POSTGRES_URL_HERE"),
-        "You forgot to change the default URL"
-      ),
     GITHUB_CLIENT_ID: z.string().refine(
       (str) => !str.includes("YOUR_GITHUB_CLIENT_ID_HERE"),
         "You forgot to set the GITHUB_CLIENT_ID in the .env file."
@@ -50,7 +42,6 @@ export const env = createEnv({
    */
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
-    DIRECT_URL: process.env.DIRECT_URL,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
     NODE_ENV: process.env.NODE_ENV,
