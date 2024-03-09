@@ -31,6 +31,11 @@ export async function addProjectAction(formData: FormData) {
           content: `Created project ${validatedFields.data.name}`,
         },
       },
+      author: {
+        connect: {
+          id: user.id,
+        },
+      },
       users: {
         connect: {
           id: user.id,

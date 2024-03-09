@@ -16,8 +16,10 @@ model User {
   avatarUrl String
   username  String    @unique
   email     String
+
   sessions  Session[]
   projects  Project[]
+  ownedProjects Project[] @relation("OwnedProjects")
 }
 
 model Session {
@@ -31,6 +33,10 @@ model Project {
   id        String         @id @default(uuid())
   createdAt DateTime       @default(now())
   name      String         @db.VarChar(255)
+
+  authorId  String        
+  author    User           @relation("OwnedProjects", fields: [authorId], references: [id])
+
   events    ProjectEvent[]
   users     User[]
 }
