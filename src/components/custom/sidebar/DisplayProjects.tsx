@@ -34,7 +34,7 @@ function DisplayProject({ project, isActive = false }: { project: ProjectWithAut
           <h1 className="text-xl text-foreground">{project.name}</h1>
           <h2 className="text-foreground">Creator: {project.author.username}</h2>
         </div>
-        <div className="ml-auto mr-4 text-foreground">Users: {project._count.users}</div>
+        <h2 className="ml-auto mr-4 text-foreground">Users: {project._count.users}</h2>
               
       </div>
     </Link>
