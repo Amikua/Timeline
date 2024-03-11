@@ -8,8 +8,25 @@ const githubUserValidation = z.object({
 	login: z.string(),
 	id: z.number(),
 	avatar_url: z.string(),
-	email: z.string().nullable().transform((v) => v ?? "Unknown email"),
+	email: z.string().nullable(),
 });
+
+const githubUserEmailsSchema = z.array(z.object({
+	email: z.string(),
+	primary: z.boolean(),
+}))
+
+async function getEmail(accessToken: string) {
+	const response = await fetch("https://api.github.com/user/emails", {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	const emails = githubUserEmailsSchema.parse(await response.json());
+	const primaryEmail = emails.find(email => email.primary);
+	return primaryEmail?.email ?? emails[0]!.email;
+}
 
 
 export async function GET(request: Request): Promise<Response> {
@@ -33,6 +50,8 @@ export async function GET(request: Request): Promise<Response> {
 
 
 		const githubUser = githubUserValidation.parse(await githubUserResponse.json());
+		const email = githubUser.email ?? await getEmail(tokens.accessToken);
+
 
 		const existingUser = await db.user.findFirst({
 			where: {
@@ -47,7 +66,7 @@ export async function GET(request: Request): Promise<Response> {
 				},
 				data: {
 					avatarUrl: githubUser.avatar_url,
-					email: githubUser.email,
+					email,
 					username: githubUser.login
 				}
 			})
@@ -66,7 +85,7 @@ export async function GET(request: Request): Promise<Response> {
 			data: {
 				githubId: githubUser.id,
 				avatarUrl: githubUser.avatar_url,
-				email: githubUser.email,
+				email,
 				username: githubUser.login
 			}
 		})
