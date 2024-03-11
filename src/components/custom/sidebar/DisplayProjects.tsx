@@ -10,7 +10,7 @@ import Link from "next/link";
 export function DisplayProjects({ projects }: { projects: ProjectWithAuthorAndUserCount[] }) {
   const params = useParams<{ projectId?: string }>();
   return (
-    <main className="flex flex-col gap-4 py-4 overflow-y-auto overflow-x-hidden scrollbar scrollbar-thumb-primary scrollbar-track-background">
+    <main className="flex flex-col gap-6 max-h-full overflow-y-auto overflow-x-hidden  scrollbar scrollbar-thumb-primary scrollbar-track-background">
       {projects.map((project) => (
         <DisplayProject
           project={project}
@@ -24,7 +24,7 @@ export function DisplayProjects({ projects }: { projects: ProjectWithAuthorAndUs
 
 function DisplayProject({ project, isActive = false }: { project: ProjectWithAuthorAndUserCount, isActive?: boolean }) {
   return (
-    <Link href={`/dashboard/${project.id}`} className="max-w-[95%]">
+    <Link href={`/dashboard/${project.id}`} className="max-w-[97%] pl-1">
       <div className="flex flex-shrink-0 items-center gap-4  rounded-lg shadow shadow-gray-700 py-4 pl-4 hover:brightness-125">
         <div className={`flex min-w-[3rem] min-h-[3rem] size-12 items-center justify-center rounded-lg ${isActive ? "bg-primary" : 'bg-secondary'}`}>
           <h1 className="text-2xl text-foreground">{project.name[0]}</h1>
