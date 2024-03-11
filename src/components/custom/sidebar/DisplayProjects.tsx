@@ -1,9 +1,6 @@
 "use client";
-import { type Project } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 import { useParams } from "next/navigation";
-
-
-import { Prisma } from "@prisma/client";
 import Link from "next/link";
 
 
