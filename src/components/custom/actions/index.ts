@@ -7,19 +7,24 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const addProjectValidation = z.object({
-  name: z.string(),
+  name: z.string().min(1),
 });
 
 export async function addProjectAction(formData: FormData) {
   const { user } = await validateRequest();
+  if (!user) {
+    return {
+      error: "Unauthorized",
+    };
+  }
   const validatedFields = addProjectValidation.safeParse({
     name: formData.get("name"),
   });
 
-  if (!validatedFields.success || !user) {
-    return new Response(null, {
-      status: 400,
-    });
+  if (!validatedFields.success) {
+    return {
+      error: "Invalid fields",
+    }
   }
 
   await db.project.create({

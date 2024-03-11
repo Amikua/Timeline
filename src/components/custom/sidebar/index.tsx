@@ -26,7 +26,7 @@ export default async function Sidebar({ user }: { user: User}) {
   return (
     <nav className="h-screen min-w-96 max-w-96 border-r border-gray-700">
       <div className="flex h-full flex-col justify-between px-6 pt-12">
-        <div>
+        <div className="max-h-[85%]">
           <DisplayUser user={user} />
           <DisplayProjects projects={projects} />
         </div>

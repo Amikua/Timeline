@@ -10,7 +10,7 @@ import Link from "next/link";
 export function DisplayProjects({ projects }: { projects: ProjectWithAuthorAndUserCount[] }) {
   const params = useParams<{ projectId?: string }>();
   return (
-    <main className="flex flex-col gap-4 py-4">
+    <main className="flex flex-col gap-4 py-4 overflow-y-auto overflow-x-hidden scrollbar scrollbar-thumb-primary scrollbar-track-background max-h-full">
       {projects.map((project) => (
         <DisplayProject
           project={project}
@@ -24,17 +24,17 @@ export function DisplayProjects({ projects }: { projects: ProjectWithAuthorAndUs
 
 function DisplayProject({ project, isActive = false }: { project: ProjectWithAuthorAndUserCount, isActive?: boolean }) {
   return (
-    <Link href={`/dashboard/${project.id}`}>
-      <div className="flex items-center gap-4  rounded-lg shadow shadow-gray-700 py-4 pl-4 hover:brightness-125">
-        <div className={`flex size-12 items-center justify-center rounded-lg ${isActive ? "bg-primary" : 'bg-secondary'}`}>
+    <Link href={`/dashboard/${project.id}`} className="max-w-[95%]">
+      <div className="flex flex-shrink-0 items-center gap-4  rounded-lg shadow shadow-gray-700 py-4 pl-4 hover:brightness-125">
+        <div className={`flex min-w-[3rem] min-h-[3rem] size-12 items-center justify-center rounded-lg ${isActive ? "bg-primary" : 'bg-secondary'}`}>
           <h1 className="text-2xl text-foreground">{project.name[0]}</h1>
         </div>
 
-        <div className="flex flex-col">
-          <h1 className="text-xl text-foreground">{project.name}</h1>
+        <div className="flex flex-col overflow-hidden">
+          <h1 className="text-xl text-foreground w-full break-words">{project.name}</h1>
           <h2 className="text-foreground">Creator: {project.author.username}</h2>
         </div>
-        <h2 className="ml-auto mr-4 text-foreground">Users: {project._count.users}</h2>
+        <h2 className="ml-auto mr-4 text-foreground min-w-max">Users: {project._count.users}</h2>
               
       </div>
     </Link>
