@@ -5,10 +5,34 @@ import { z } from "zod";
 import { db } from "~/server/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { action } from "~/lib/safe-action";
 
 const addProjectValidation = z.object({
   name: z.string().min(1),
 });
+
+const addUsernameToProjectValidation = z.object({
+  id: z.string().min(1),
+  projectId: z.string().min(1),
+});
+
+export const addUserToProject = action(
+  addUsernameToProjectValidation,
+  async ({ id, projectId }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+    await db.project.update({
+      where: { id: projectId },
+      data: { users: { connect: { id } } },
+    });
+
+    revalidatePath(`/dashboard`);
+  },
+);
 
 export async function addProjectAction(formData: FormData) {
   const { user } = await validateRequest();
@@ -24,7 +48,7 @@ export async function addProjectAction(formData: FormData) {
   if (!validatedFields.success) {
     return {
       error: "Invalid fields",
-    }
+    };
   }
 
   const { id } = await db.project.create({
