@@ -10,7 +10,7 @@ import Link from "next/link";
 export function DisplayProjects({ projects }: { projects: ProjectWithAuthorAndUserCount[] }) {
   const params = useParams<{ projectId?: string }>();
   return (
-    <main className="flex flex-col gap-4 py-4 overflow-y-auto overflow-x-hidden scrollbar scrollbar-thumb-primary scrollbar-track-background max-h-full">
+    <main className="flex flex-col gap-4 py-4 overflow-y-auto overflow-x-hidden scrollbar scrollbar-thumb-primary scrollbar-track-background">
       {projects.map((project) => (
         <DisplayProject
           project={project}
