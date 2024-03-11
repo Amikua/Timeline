@@ -3,7 +3,6 @@
   "style": "default",
   "rsc": true,
   "tsx": true,
-  "darkMode": true,
   "tailwind": {
     "config": "tailwind.config.ts",
     "css": "src/styles/globals.css",
