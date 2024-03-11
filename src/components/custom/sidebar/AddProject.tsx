@@ -15,8 +15,16 @@ import { Label } from "~/components/ui/label";
 import { addProjectAction } from "~/components/custom/actions";
 import { DialogDescription } from "@radix-ui/react-dialog";
 
+function SubmitButton() {
+  const status = useFormStatus();
+  return (
+    <Button type="submit" disabled={status.pending}>
+      Add project
+    </Button>
+  );
+};
+
 export function AddProject() {
-  const { pending } = useFormStatus();
   const [open, setOpen] = useState(false);
 
   return (
@@ -56,9 +64,7 @@ export function AddProject() {
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={pending}>
-              Add
-            </Button>
+            <SubmitButton />
           </DialogFooter>
         </form>
       </DialogContent>
