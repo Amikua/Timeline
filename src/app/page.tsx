@@ -1,5 +1,6 @@
 import { validateRequest } from "~/lib/auth";
 import { redirect } from "next/navigation";
+import { GithubLoginButton } from "~/components/custom/GithubLoginButton";
 
 export default async function Page() {
 	const { user } = await validateRequest();
@@ -8,9 +9,7 @@ export default async function Page() {
 	}
 	return (
 		<div className="w-full min-h-screen text-white flex flex-col justify-center items-center">
-			<div className="bg-zinc-900 w-48 h-20 flex justify-center items-center rounded-2xl">
-				<a href="/login/github" className="text-lg">Sign in with GitHub</a>
-			</div>
+			<GithubLoginButton />
 		</div>
 	);
 }
