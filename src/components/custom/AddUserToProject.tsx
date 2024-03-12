@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 
-import { User } from "@prisma/client";
+import { type User } from "@prisma/client";
 import { addUserToProject } from "./actions";
 
 export function AddUserToProject({
@@ -55,7 +55,7 @@ export function AddUserToProject({
               <CommandItem
                 key={user.id}
                 value={user.username}
-                onSelect={async (currentValue) => {
+                onSelect={async () => {
                   await addUserToProject({ id: user.id, projectId });
                   setOpen(false);
                 }}

@@ -16,6 +16,11 @@ const addUsernameToProjectValidation = z.object({
   projectId: z.string().min(1),
 });
 
+const removeUserFromProjectValidation = z.object({
+  id: z.string().min(1),
+  projectId: z.string().min(1),
+});
+
 export const addUserToProject = action(
   addUsernameToProjectValidation,
   async ({ id, projectId }) => {
@@ -28,6 +33,31 @@ export const addUserToProject = action(
     await db.project.update({
       where: { id: projectId },
       data: { users: { connect: { id } } },
+    });
+
+    revalidatePath(`/dashboard`);
+  },
+);
+
+export const removeUserFromProject = action(
+  removeUserFromProjectValidation,
+  async ({ id, projectId }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+    const project = await db.project.findFirst({
+      where: { id: projectId },
+      include: { _count: { select: { users: true } } },
+    });
+    if (!project || project?._count.users < 2) {
+      return { error: "To few users" };
+    }
+    await db.project.update({
+      where: { id: projectId },
+      data: { users: { disconnect: { id } } },
     });
 
     revalidatePath(`/dashboard`);
