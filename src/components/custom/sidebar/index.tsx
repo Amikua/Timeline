@@ -47,6 +47,9 @@ async function GetAndDisplayProjects({ user }: { user: User }) {
       _count: {
         select: { users: true }
       }
+    },
+    orderBy: {
+      createdAt: "desc"
     }
   });
 

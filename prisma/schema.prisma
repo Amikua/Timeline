@@ -11,14 +11,14 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  githubId  Int       @unique
+  id        String @id @default(uuid())
+  githubId  Int    @unique
   avatarUrl String
-  username  String    @unique
+  username  String @unique
   email     String
 
-  sessions  Session[]
-  projects  Project[]
+  sessions      Session[]
+  projects      Project[]
   ownedProjects Project[] @relation("OwnedProjects")
 }
 
@@ -30,15 +30,15 @@ model Session {
 }
 
 model Project {
-  id        String         @id @default(uuid())
-  createdAt DateTime       @default(now())
-  name      String         @db.VarChar(255)
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  name      String   @db.VarChar(255)
 
-  authorId  String        
-  author    User           @relation("OwnedProjects", fields: [authorId], references: [id])
+  authorId String
+  author   User   @relation("OwnedProjects", fields: [authorId], references: [id])
 
-  events    ProjectEvent[]
-  users     User[]
+  events ProjectEvent[]
+  users  User[]
 }
 
 model ProjectEvent {

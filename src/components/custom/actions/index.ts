@@ -27,7 +27,7 @@ export async function addProjectAction(formData: FormData) {
     }
   }
 
-  await db.project.create({
+  const { id } = await db.project.create({
     data: {
       name: validatedFields.data.name,
       events: {
@@ -48,9 +48,9 @@ export async function addProjectAction(formData: FormData) {
       },
     },
   });
-  formData.set("Project name", "");
 
   revalidatePath("/");
+  redirect(`/dashboard/${id}`);
 }
 
 export async function logout(): Promise<ActionResult> {
