@@ -27,7 +27,7 @@ export default async function Page({
 }: {
   params: { projectId: string };
 }) {
-  const usersNotInProejct = await db.user.findMany({
+  const usersNotInProject = await db.user.findMany({
     where: { NOT: { projects: { some: { id: projectId } } } },
   });
   return (
@@ -41,7 +41,7 @@ export default async function Page({
           <h2 className="mb-4 text-lg text-white">
             Enter the username of the user you want to add to the project.
           </h2>
-          <AddUserToProject users={usersNotInProejct} projectId={projectId} />
+          <AddUserToProject users={usersNotInProject} projectId={projectId} />
         </div>
         <div className="mt-2 flex w-[45vh] flex-col items-start justify-start rounded-xl border p-4 shadow-md">
           <h1 className="mb-2 text-2xl font-bold text-white">Current users</h1>

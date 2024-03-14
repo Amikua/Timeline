@@ -12,10 +12,10 @@ export type EventAndAuthor = Prisma.ProjectEventGetPayload<{
 
 export async function Timeline({
   projectId,
-  selectedDate: selectedDate,
+  selectedDate: selectedDateFromSearchParams,
 }: {
   projectId: string;
-  selectedDate: string;
+  selectedDate: string | undefined;
 }) {
   const project = await db.project.findFirst({
     where: {
@@ -49,11 +49,9 @@ export async function Timeline({
     {} as Record<string, EventAndAuthor[]>,
   );
 
-  if (!selectedDate && Object.keys(eventsGroupByDay).length > 0) {
-    return redirect(
-      `/dashboard/${projectId}?date=${Object.keys(eventsGroupByDay)[0]}`,
-    );
-  }
+  // We always have at least one event
+  const selectedDate =
+    selectedDateFromSearchParams ?? Object.keys(eventsGroupByDay)[0]!;
 
   return (
     <>
