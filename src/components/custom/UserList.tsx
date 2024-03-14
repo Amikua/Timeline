@@ -1,13 +1,4 @@
 import { db } from "~/server/db";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
 import { RemoveUserFromProject } from "./RemoveUserFromProject";
 
 export async function UserList({ projectId }: { projectId: string }) {
@@ -17,38 +8,42 @@ export async function UserList({ projectId }: { projectId: string }) {
       users: true,
     },
   });
+
   return (
-    <Table>
-      <TableCaption>Members of the project.</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead className=" w-20" />
-          <TableHead className="w-[100px]">Username</TableHead>
-  
-        </TableRow>
-      </TableHeader>
-      <TableBody>
+    <table className="text-white">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody>
         {project?.users.map((user, index) => (
-          <TableRow key={index}>
-            <TableCell className="text-center font-medium">
-              <img
-                src={user.avatarUrl}
-                alt="Avatar"
-                className=" float-end size-10 rounded-3xl"
-              />
-            </TableCell>
-            <TableCell>{user.username}</TableCell>
-            <TableCell>{user.email}</TableCell>
-            <TableCell className="text-right">
-              <RemoveUserFromProject
-                user={user}
-                projectId={projectId}
-                disabled={project.users.length < 2}
-              ></RemoveUserFromProject>
-            </TableCell>
-          </TableRow>
+          <tr key={index}>
+            <td className="px-4 py-4">
+              <div className="flex items-center">
+                <img
+                  src={user.avatarUrl}
+                  alt="Avatar"
+                  className="mr-2 h-10 w-10 rounded-full"
+                />
+                <span>{user.username}</span>
+              </div>
+            </td>
+            <td className="px-4 py-4">{user.email}</td>
+            <td className="px-4py-4">
+              <div className="flex justify-center">
+                <RemoveUserFromProject
+                  user={user}
+                  projectId={projectId}
+                  disabled={project.users.length < 2}
+                />
+              </div>
+            </td>
+          </tr>
         ))}
-      </TableBody>
-    </Table>
+      </tbody>
+    </table>
   );
 }

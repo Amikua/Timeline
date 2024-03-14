@@ -13,7 +13,7 @@ export default async function Page({
         className="absolute right-4 top-4"
       >
         <svg
-          className="text-primary"
+          className="text-primary hover:brightness-150"
           xmlns="http://www.w3.org/2000/svg"
           width="2em"
           height="2em"

@@ -16,16 +16,17 @@ import { type User } from "@prisma/client";
 export function RemoveUserFromProject({
   user,
   projectId,
-  disabled
+  disabled,
 }: {
   user: User;
   projectId: string;
-  disabled: boolean
+  disabled: boolean;
 }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger disabled={disabled}>
         <svg
+          className="scale scale-50 hover:brightness-150"
           xmlns="http://www.w3.org/2000/svg"
           width="2em"
           height="2em"
@@ -49,7 +50,7 @@ export function RemoveUserFromProject({
         <AlertDialogFooter>
           <AlertDialogCancel>No</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive hover:bg-destructive hover:brightness-75"
+            className="float-right bg-destructive hover:bg-destructive hover:brightness-150"
             onClick={async () => {
               await removeUserFromProject({ id: user.id, projectId });
             }}
