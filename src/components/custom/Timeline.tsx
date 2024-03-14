@@ -56,7 +56,7 @@ export async function Timeline({
   return (
     <>
       <div className="relative flex-1 flex items-center justify-center">
-        <div className="flex min-h-full max-h-[50rem] min-w-fit w-2/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary">
+        <div className="flex h-full max-h-[50rem] w-4/5 xl:w-3/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary">
           <div className="flex justify-between break-words rounded-xl px-2">
             <div className="my-auto">
               <h1> Event for day {selectedDate}</h1>
@@ -89,21 +89,22 @@ export async function Timeline({
         </div>
       </div>
 
-      <div className="relative flex h-28 min-h-28 gap-4 border-b-2 border-secondary px-8">
+      <div className="relative flex h-28 min-h-28 gap-8 border-b-2 border-secondary px-8">
         {Object.entries(eventsGroupByDay).map(([date, events]) => {
           return (
             <Link
               href={`/dashboard/${projectId}?date=${date}`}
               key={date}
-              className={`style-for-timeline-dot-leg relative size-8 rounded-3xl py-1 text-center shadow-lg before:w-3
+              className={`style-for-timeline-dot-leg relative size-8 rounded-3xl py-1 text-center shadow-lg
             ${selectedDate === date ? "bg-primary shadow-primary after:bg-primary" : "bg-secondary shadow-secondary after:bg-secondary "}
           `}
             >
+              <span className="absolute top-[-2rem] left-1/2 transform -translate-x-1/2 w-max h-10">{date.split('-').splice(0, 2).map(it => it.padStart(2, '0')).join('-')}</span>
               {events.length}
             </Link>
           );
         })}
-      </div>
+      </div >
     </>
   );
 }

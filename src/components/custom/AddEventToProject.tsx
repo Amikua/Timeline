@@ -32,7 +32,7 @@ export function AddEventToProject({ projectId }: { projectId: string }) {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="mb-4 rounded-lg border-2 border-border py-6"
+          className="rounded-lg border-2 border-border py-6 my-auto"
         >
           Add event
         </Button>
