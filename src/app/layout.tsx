@@ -1,11 +1,10 @@
 import "~/styles/globals.css";
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 
-const inter = Inter({
+const inter = Open_Sans({
   subsets: ["latin"],
-  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
@@ -20,9 +19,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable} bg-background text-foreground`}>
+      <body className={`${inter.className} bg-background text-foreground`}>
         {children}
       </body>
-    </html>
+    </html >
   );
 }
