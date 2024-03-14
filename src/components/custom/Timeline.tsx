@@ -55,8 +55,8 @@ export async function Timeline({
 
   return (
     <>
-      <div className="flex items-center justify-center">
-        <div className="flex h-[50rem] max-h-[50rem] min-w-fit w-2/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary">
+      <div className="relative flex-1 flex items-center justify-center">
+        <div className="flex min-h-full max-h-[50rem] min-w-fit w-2/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary">
           <div className="flex justify-between break-words rounded-xl px-2">
             <div className="my-auto">
               <h1> Event for day {selectedDate}</h1>
