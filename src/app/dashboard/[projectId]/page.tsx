@@ -31,9 +31,9 @@ export default async function Page({
   searchParams: Record<string, string | undefined>;
 }) {
   return (
-    <div className="flex h-full min-h-full max-h-screen; min-w-full flex-col justify-between p-16">
+    <>
       <SettingsLink projectId={projectId} />
       <Timeline projectId={projectId} selectedDate={searchParams.date} />
-    </div>
+    </>
   );
 }

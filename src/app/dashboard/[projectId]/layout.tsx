@@ -31,5 +31,9 @@ export default async function RootLayout({
     return redirect("/dashboard");
   }
 
-  return <>{children}</>;
+  return (
+    <div className="relative flex h-full min-h-full max-h-screen; min-w-full flex-col justify-between p-16">
+      {children}
+    </div>
+  );
 }

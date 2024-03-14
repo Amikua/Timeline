@@ -50,8 +50,10 @@ export async function Timeline({
   );
 
   // We always have at least one event
+  const keys = Object.keys(eventsGroupByDay);
+
   const selectedDate =
-    selectedDateFromSearchParams ?? Object.keys(eventsGroupByDay)[0]!;
+    selectedDateFromSearchParams ?? keys[keys.length - 1]!;
 
   return (
     <>

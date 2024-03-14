@@ -1,7 +1,10 @@
-import { UserList } from "~/components/custom/UserList";
 import { AddUserToProject } from "~/components/custom/AddUserToProject";
 import { db } from "~/server/db";
 import Link from "next/link";
+import { type User } from "lucia";
+import { validateRequest } from "~/lib/auth";
+import { redirect } from "next/navigation";
+import { RemoveUserFromProject } from "~/components/custom/RemoveUserFromProject";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -22,34 +25,68 @@ function GoBackToProject({ projectId }: { projectId: string }) {
   );
 }
 
+function DisplayUser({ user, isCurrentUser, projectId, disabledRemoveButton }: { user: User, isCurrentUser: boolean, projectId: string, disabledRemoveButton: boolean }) {
+  return (
+    <div className={`flex justify-between pb-4 ${isCurrentUser && 'border-b border-muted mb-2'}`}>
+      <div className="flex items-center gap-4">
+        <img src={user.avatarUrl} alt="avatar" className="size-10 rounded-full" />
+        <div>
+          <h1>{user.username}</h1>
+          <h2>{user.email}</h2>
+        </div>
+      </div >
+      <RemoveUserFromProject
+        disabled={disabledRemoveButton}
+        projectId={projectId}
+        user={user}
+        text={isCurrentUser ? "Leave" : "Remove"}
+      />
+    </ div >
+  )
+}
+
 export default async function Page({
   params: { projectId },
 }: {
   params: { projectId: string };
 }) {
+  const { user: currentUser } = await validateRequest();
+  if (!currentUser) {
+    return redirect("/");
+  }
+
   const usersNotInProject = await db.user.findMany({
     where: { NOT: { projects: { some: { id: projectId } } } },
   });
+
+  const allUsers = await db.user.findMany({
+    where: { projects: { some: { id: projectId } } },
+  });
+
+  const disabledRemoveButton = allUsers.length < 2;
+
+
   return (
-    <>
+    <div className="min-w-full max-w-full min-h-full max-h-full shadow-lg shadow-secondary rounded-2xl">
       <GoBackToProject projectId={projectId} />
-      <div className="flex h-screen flex-col items-center justify-center">
-        <div className="rounded-xl p-4 shadow-md">
-          <h1 className="text-2xl font-bold text-white">
-            Add a user to the project
-          </h1>
-          <h2 className="text-lg text-white">
-            Enter the username of the user you want to add to the project.
-          </h2>
+      <h1 className="mx-auto text-4xl px-16 w-11/12 text-center font-bold py-10 border-b-2 border-secondary">Settings</h1>
+      <div className="grid grid-cols-2 px-16 py-12">
+        <div className="flex flex-col gap-4 w-max">
+          <h1 className="text-2xl font-bold">Add New User</h1>
+          <h2 className="text-lg">Enter the username of the user to add to the project.</h2>
           <AddUserToProject users={usersNotInProject} projectId={projectId} />
         </div>
-        <div className="flex flex-col items-start justify-start rounded-xl p-4 shadow-md">
-          <h1 className="text-2xl font-bold text-white">Current users</h1>
-          <div className="flex w-full flex-1 items-center justify-center">
-            <UserList projectId={projectId} />
+        <div className="flex flex-col gap-4">
+          <h1 className="text-2xl font-bold">Current Users</h1>
+          <h2 className="text-lg">These are teh currenct users of your project.</h2>
+          <div className="flex flex-col gap-4 overflow-y-auto">
+            <DisplayUser user={currentUser} isCurrentUser={true} disabledRemoveButton={disabledRemoveButton} projectId={projectId} />
+            {allUsers.filter(user => user.username !== currentUser.username).map((user) => (
+              <DisplayUser key={user.id} user={user} isCurrentUser={false} disabledRemoveButton={disabledRemoveButton} projectId={projectId} />
+            ))}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

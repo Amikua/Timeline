@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-
-import { cn } from "~/lib/utils";
+import { ChevronsUpDown } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -29,7 +27,6 @@ export function AddUserToProject({
   projectId: string;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -38,15 +35,13 @@ export function AddUserToProject({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-96 justify-between"
         >
-          {value
-            ? users.find((user) => user.username === value)?.username
-            : "Add a user..."}
+          Add a user...
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-96 p-0">
         <Command>
           <CommandInput placeholder="Search users..." />
           <CommandEmpty>No users found.</CommandEmpty>
@@ -55,17 +50,12 @@ export function AddUserToProject({
               <CommandItem
                 key={user.id}
                 value={user.username}
+                className="cursor-pointer"
                 onSelect={async () => {
                   await addUserToProject({ id: user.id, projectId });
                   setOpen(false);
                 }}
               >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === user.username ? "opacity-100" : "opacity-0",
-                  )}
-                />
                 {user.username}
               </CommandItem>
             ))}
