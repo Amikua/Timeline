@@ -10,21 +10,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { addProjectAction } from "~/components/custom/actions";
+import { addEventToProject } from "~/components/custom/actions";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import { Textarea } from "../ui/textarea";
 
 function SubmitButton() {
   const status = useFormStatus();
   return (
     <Button type="submit" disabled={status.pending}>
-      Add project
+      Add event
     </Button>
   );
-};
+}
 
-export function AddProject() {
+export function AddEventToProject({ projectId }: { projectId: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -32,37 +32,34 @@ export function AddProject() {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="mb-4 py-6 border-2 rounded-lg border-border"
+          className="mb-4 rounded-lg border-2 border-border py-6"
         >
-          Add new project
+          Add event
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] border-border">
+      <DialogContent className="border-border sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>New project</DialogTitle>
+          <DialogTitle>New project event</DialogTitle>
         </DialogHeader>
         <DialogDescription>
-          Add a new project to your dashboard.
+          Add a new project event to the timeline.
         </DialogDescription>
         <form
-          className="py-4"
+          className="flex flex-col p-4 gap-4"
           action={async (formData: FormData) => {
-            await addProjectAction(formData);
+            await addEventToProject({
+              projectId,
+              content: formData.get("content") as string,
+            });
             setOpen(false);
           }}
         >
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
-                Name
+                Message
               </Label>
-              <Input
-                id="name"
-                name="name"
-                minLength={1}
-                required
-                className="col-span-3 bg-zinc-800 text-white"
-              />
+              <Textarea required maxLength={255} id="name" name="content" className="col-span-3 " />
             </div>
           </div>
           <DialogFooter>

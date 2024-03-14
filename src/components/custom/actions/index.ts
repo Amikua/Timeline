@@ -21,6 +21,11 @@ const removeUserFromProjectValidation = z.object({
   projectId: z.string().min(1),
 });
 
+const addEventToProjectSchema = z.object({
+  projectId: z.string().min(1),
+  content: z.string().min(1),
+});
+
 export const addUserToProject = action(
   addUsernameToProjectValidation,
   async ({ id, projectId }) => {
@@ -61,6 +66,42 @@ export const removeUserFromProject = action(
     });
 
     revalidatePath(`/dashboard`);
+  },
+);
+
+export const addEventToProject = action(
+  addEventToProjectSchema,
+  async ({ projectId, content }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+    try {
+      await db.projectEvent.create({
+        data: {
+          content,
+          author: {
+            connect: {
+              id: user.id,
+            },
+          },
+          Project: {
+            connect: {
+              id: projectId,
+            },
+          },
+        },
+      });
+      revalidatePath(`/dashboard/${projectId}`);
+    } catch(err) {
+      console.error(err);
+      revalidatePath(`/dashboard/${projectId}`);
+      return {
+        error: "Error creating event",
+      };
+    }
   },
 );
 

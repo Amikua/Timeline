@@ -1,5 +1,3 @@
-import "~/styles/globals.css";
-
 import type { Metadata } from "next";
 import Sidebar from "~/components/custom/sidebar";
 import { validateRequest } from "~/lib/auth";
@@ -21,10 +19,10 @@ export default async function RootLayout({
   }
   return (
     <div className="relative w-full h-full flex flex-1">
-        <Sidebar user={user} /> 
-        <main className="w-full h-full p-2 rounded-sm">
-            { children }
-        </main>
+      <Sidebar user={user} />
+      <main className="relative min-h-full w-full p-2 rounded-sm">
+        {children}
+      </main>
     </div>
   );
 }

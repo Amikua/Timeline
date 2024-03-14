@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
 @layer base {
   :root {
     --background: 240 10% 3.9%;
@@ -49,5 +47,21 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     --radius: 0.75rem;
+  }
+}
+
+
+@layer components {
+  .style-for-timeline-dot-leg::after {
+    content: ' ';
+    /* background-color: hsl(var(--secondary)); */
+    background-color: hsl(240 10% 3.9%);
+    width: 0.3rem;
+    right: 50%;
+    height: 5.1rem; /* This will stretch the pseudo-element to the full height of the parent */
+    position: absolute;
+    bottom: -4.9rem; /* Aligns the bottom of the pseudo-element with the bottom of the parent */
+    z-index: -1;
+    transform: translateX(50%);
   }
 }

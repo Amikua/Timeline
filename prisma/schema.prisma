@@ -19,7 +19,8 @@ model User {
 
   sessions      Session[]
   projects      Project[]
-  ownedProjects Project[] @relation("OwnedProjects")
+  ownedProjects Project[]      @relation("OwnedProjects")
+  ProjectEvent  ProjectEvent[]
 }
 
 model Session {
@@ -44,8 +45,11 @@ model Project {
 model ProjectEvent {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  authorId  String
   content   String   @db.VarChar(255)
+
+  authorId String
+  author   User   @relation(references: [id], fields: [authorId], onDelete: Cascade)
+
   projectId String
-  Project   Project  @relation(references: [id], fields: [projectId], onDelete: Cascade)
+  Project   Project @relation(references: [id], fields: [projectId], onDelete: Cascade)
 }
