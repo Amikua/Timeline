@@ -17,10 +17,13 @@ model User {
   username  String @unique
   email     String
 
-  sessions      Session[]
-  projects      Project[]
-  ownedProjects Project[]      @relation("OwnedProjects")
-  ProjectEvent  ProjectEvent[]
+  sessions Session[]
+
+  projects       Project[]
+  ownedProjects  Project[] @relation("OwnedProjects")
+  unreadProjects Project[] @relation("UnreadProjects")
+
+  ProjectEvent ProjectEvent[]
 }
 
 model Session {
@@ -38,13 +41,16 @@ model Project {
   authorId String
   author   User   @relation("OwnedProjects", fields: [authorId], references: [id])
 
+  users    User[]
+  unreadBy User[] @relation("UnreadProjects")
+
   events ProjectEvent[]
-  users  User[]
 }
 
 model ProjectEvent {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
+  happendAt DateTime @default(now())
   content   String   @db.VarChar(255)
 
   authorId String

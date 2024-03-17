@@ -69,9 +69,9 @@ export default async function Page({
   return (
     <div className="min-w-full max-w-full min-h-full max-h-full shadow-lg shadow-secondary rounded-2xl">
       <GoBackToProject projectId={projectId} />
-      <h1 className="mx-auto text-4xl px-16 w-11/12 text-center font-bold py-10 border-b-2 border-secondary">Settings</h1>
-      <div className="grid grid-cols-2 px-16 py-12">
-        <div className="flex flex-col gap-4 w-max">
+      <h1 className="mx-auto text-4xl px-16 w-11/12 text-center font-bold py-10 border-b-2 border-secondary">Project Settings</h1>
+      <div className="grid grid-cols-1 gap-4 xl:gap-0 xl:grid-cols-2 px-16 py-12">
+        <div className="flex flex-col gap-4 w-full">
           <h1 className="text-2xl font-bold">Add New User</h1>
           <h2 className="text-lg">Enter the username of the user to add to the project.</h2>
           <AddUserToProject users={usersNotInProject} projectId={projectId} />

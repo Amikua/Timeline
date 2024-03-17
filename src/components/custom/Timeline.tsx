@@ -72,14 +72,17 @@ export async function Timeline({
                   key={event.id}
                   className="flex flex-col gap-4 break-words rounded-xl p-6 shadow-md shadow-muted"
                 >
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 pb-4 border-b border-secondary">
                     <img
                       src={event.author.avatarUrl}
                       alt="avatar"
                       className="h-12 w-12 rounded-full"
                     />
                     <div>
-                      <h1>{event.author.username}</h1>
+                      <div className="flex gap-2 items-center">
+                        <h1>{event.author.username}</h1>
+                        <h3 className="text-sm font-thin text-secondary-foreground">{event.happendAt.toLocaleTimeString()}</h3>
+                      </div>
                       <h2>{event.author.email}</h2>
                     </div>
                   </div>
@@ -88,8 +91,8 @@ export async function Timeline({
               );
             })}
           </main>
-        </div>
-      </div>
+        </div >
+      </div >
 
       <div className="relative flex h-28 min-h-28 gap-8 border-b-2 border-secondary px-8">
         {Object.entries(eventsGroupByDay).map(([date, events]) => {

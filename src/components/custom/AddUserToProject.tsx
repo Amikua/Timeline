@@ -35,13 +35,13 @@ export function AddUserToProject({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-96 justify-between"
+          className="w-96 max-w-full justify-between"
         >
           Add a user...
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0">
+      <PopoverContent className="w-96 max-w-full p-0">
         <Command>
           <CommandInput placeholder="Search users..." />
           <CommandEmpty>No users found.</CommandEmpty>
