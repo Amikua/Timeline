@@ -4,6 +4,7 @@ import { type EventAndAuthor } from "./TimelineWrapper";
 import { elementScroll, useVirtualizer, type VirtualizerOptions } from "@tanstack/react-virtual";
 import { getProjectEvents } from "./actions";
 import { removeEventFromProject } from "./actions";
+import Image from "next/image";
 
 function RemoveEventButton({ projectId, eventId, events, setEvents }: { projectId: string, eventId: string, events: EventAndAuthor[], setEvents: (events: EventAndAuthor[]) => void }) {
   return (
@@ -129,7 +130,6 @@ export function ProjectEventsView({
           const response = await getProjectEvents({
             projectId,
             offset: events.length,
-            firstRequest: false
           });
           const newEvents = response.data!.events!;
           setHasMore(response.data!.hasMore!);
@@ -184,7 +184,7 @@ export function ProjectEventsView({
                   className="absolute top-0 left-0 w-full shadow-md shadow-muted rounded-xl flex flex-col gap-8 p-4"
                 >
                   <div className="flex gap-4 border-b border-secondary py-4 w-full">
-                    <img src={event.author.avatarUrl} alt="avatar" className="h-12 w-12 rounded-full" />
+                    <Image src={event.author.avatarUrl} alt="avatar" width={48} height={48} className="h-12 w-12 rounded-full" />
                     <div className="w-full">
                       <div className="flex gap-2 items-center w-full">
                         <h1>{event.author.username}</h1>

@@ -12,7 +12,6 @@ import {
 } from "~/components/ui/alert-dialog";
 import { removeUserFromProject } from "./actions";
 import { type User } from "@prisma/client";
-import { ReactNode } from "react";
 
 export function RemoveUserFromProject({
   user,

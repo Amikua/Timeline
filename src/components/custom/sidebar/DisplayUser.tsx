@@ -1,6 +1,6 @@
-
 import { type User } from "lucia";
 import { logout } from "~/components/custom/actions";
+import Image from "next/image";
 
 function Logout() {
   return (
@@ -21,7 +21,7 @@ export function DisplayUser({ user }: { user: User }) {
   return (
     <div className="flex place-content-between pl-4 pb-4 border-b-2 border-gray-700">
       <div className="flex gap-2">
-        <img className="size-8 rounded-2xl" src={user.avatarUrl} />
+        <Image alt="Avatar of current user" width={32} height={32} className="size-8 rounded-2xl" src={user.avatarUrl} />
         <div>
           <h1 className="text-white">Welcome {user.username}</h1>
           <h2 className="text-sm text-stone-200">{user.email}</h2>

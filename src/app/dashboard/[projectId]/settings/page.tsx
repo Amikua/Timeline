@@ -5,6 +5,7 @@ import { type User } from "lucia";
 import { validateRequest } from "~/lib/auth";
 import { redirect } from "next/navigation";
 import { RemoveUserFromProject } from "~/components/custom/RemoveUserFromProject";
+import Image from "next/image";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -29,7 +30,7 @@ function DisplayUser({ user, isCurrentUser, projectId, disabledRemoveButton }: {
   return (
     <div className={`flex justify-between pb-4 ${isCurrentUser && 'border-b border-muted mb-2'}`}>
       <div className="flex items-center gap-4">
-        <img src={user.avatarUrl} alt="avatar" className="size-10 rounded-full" />
+        <Image src={user.avatarUrl} alt="Current user avatar" width={40} height={40} className="size-10 rounded-full" />
         <div>
           <h1>{user.username}</h1>
           <h2>{user.email}</h2>

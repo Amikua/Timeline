@@ -3,7 +3,7 @@ import { AddProject } from "./AddProject";
 import { type User } from "lucia";
 import { DisplayUser } from "./DisplayUser";
 import { DisplayProjects } from "./DisplayProjects";
-import { Suspense } from "react";
+// import { Suspense } from "react";
 // import { Skeleton } from "~/components/ui/skeleton";
 
 // export function DisplaySkeletonProjects() {

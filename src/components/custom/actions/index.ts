@@ -35,7 +35,6 @@ const removeEventFromProjectSchema = z.object({
 const getProjectEventsSchema = z.object({
   projectId: z.string().min(1),
   offset: z.number().int().optional().default(0),
-  firstRequest: z.boolean().optional().default(true),
 });
 
 const addRandomEventToProjectSchema = z.object({
@@ -77,7 +76,7 @@ export const addRandomEventsToProject = action(
 
 export const getProjectEvents = action(
   getProjectEventsSchema,
-  async ({ projectId, firstRequest, offset }) => {
+  async ({ projectId, offset }) => {
     const { user } = await validateRequest();
     if (!user) {
       return {
