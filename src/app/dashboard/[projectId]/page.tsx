@@ -1,5 +1,5 @@
-import { Timeline } from "~/components/custom/Timeline";
 import Link from "next/link";
+import { TimelineWrapper } from "~/components/custom/TimelineWrapper";
 
 function SettingsLink({ projectId }: { projectId: string }) {
   return (
@@ -33,7 +33,7 @@ export default async function Page({
   return (
     <>
       <SettingsLink projectId={projectId} />
-      <Timeline projectId={projectId} selectedDate={searchParams.date} />
+      <TimelineWrapper projectId={projectId} selectedDate={searchParams.date} />
     </>
   );
 }

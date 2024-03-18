@@ -32,7 +32,7 @@ export default async function RootLayout({
   }
 
   return (
-    <div className="relative flex h-full min-h-full max-h-screen; min-w-full flex-col justify-between p-16">
+    <div className="relative flex h-full min-h-full max-h-screen; min-w-full max-w-full flex-col justify-between p-16">
       {children}
     </div>
   );

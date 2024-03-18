@@ -1,44 +1,52 @@
-import { type Prisma } from "@prisma/client";
+"use client";
+import { useState, useEffect, useRef, createRef, useMemo } from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { db } from "~/server/db";
-import { AddEventToProject } from "./AddEventToProject";
+import { ProjectEventsView } from "./ProjectEventsView";
+import { type EventAndAuthor } from "./TimelineWrapper";
 
-export type EventAndAuthor = Prisma.ProjectEventGetPayload<{
-  include: {
-    author: true;
-  };
-}>;
 
-export async function Timeline({
+function useHorizontalScroll() {
+  const elRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = elRef.current;
+    if (el) {
+      const onWheel = (e: WheelEvent) => {
+        if (e.deltaY == 0) return;
+        e.preventDefault();
+        el.scrollBy(e.deltaY, 0);
+      };
+      el.addEventListener("wheel", onWheel);
+      return () => el.removeEventListener("wheel", onWheel);
+    }
+  }, []);
+  return elRef;
+}
+
+function getScrollToIndex(events: EventAndAuthor[], date: string) {
+  const index = events.findIndex(event => {
+    const [day, month, year] = date.split("-").map(Number);
+    if (!day || !month || !year) return null;
+    return event.happendAt.getDate() === day && event.happendAt.getMonth() + 1 === month && event.happendAt.getFullYear() === year;
+  });
+  return index;
+}
+
+export function Timeline({
   projectId,
-  selectedDate: selectedDateFromSearchParams,
+  selectedDateFromSearchParams,
+  events: defaultEvents,
 }: {
   projectId: string;
-  selectedDate: string | undefined;
+  selectedDateFromSearchParams?: string;
+  events: EventAndAuthor[];
 }) {
-  const project = await db.project.findFirst({
-    where: {
-      id: projectId,
-    },
-    include: {
-      events: {
-        include: {
-          author: true,
-        },
-      },
-    },
-  });
-
-  if (!project) {
-    return redirect("/dashboard");
-  }
-
-  const eventsGroupByDay = project.events.reduce(
+  const [events, setEvents] = useState(defaultEvents);
+  const [withoutAutoScroll, setWithoutAutoScroll] = useState(true);
+  const eventsGroupByDay = useMemo(() => events.reduce(
     (acc, event) => {
-      const day = event.createdAt.getDate();
-      const month = event.createdAt.getMonth();
-      const year = event.createdAt.getFullYear();
+      const day = event.happendAt.getDate();
+      const month = event.happendAt.getMonth() + 1;
+      const year = event.happendAt.getFullYear();
       const key = `${day}-${month}-${year}`;
       if (!acc[key]) {
         acc[key] = [];
@@ -47,68 +55,68 @@ export async function Timeline({
       return acc;
     },
     {} as Record<string, EventAndAuthor[]>,
-  );
+  ), [events]);
 
   // We always have at least one event
-  const keys = Object.keys(eventsGroupByDay);
+  const [currentDate, setCurrentDate] = useState(selectedDateFromSearchParams ?? Object.keys(eventsGroupByDay)[0]!);
+  const [scrollToIndex, setScrollToIndex] = useState<number | null>(() => {
+    if (selectedDateFromSearchParams) {
+      return getScrollToIndex(events, selectedDateFromSearchParams);
+    }
+    return null;
+  });
 
-  const selectedDate =
-    selectedDateFromSearchParams ?? keys[keys.length - 1]!;
+  const eventsGroupByDayWithRefs = useMemo(() => {
+    return Object.entries(eventsGroupByDay).reduce((acc, [date, events]) => {
+      acc[date] = { ref: createRef(), events };
+      return acc;
+    }, {} as Record<string, { ref: React.RefObject<HTMLAnchorElement>; events: EventAndAuthor[] }>);
+  }, [eventsGroupByDay]);
+
+  const timelineRef = useHorizontalScroll();
+
+  useEffect(() => {
+    if (!currentDate) return
+    const ref = eventsGroupByDayWithRefs[currentDate]?.ref;
+    if (!ref?.current) return;
+    ref.current.scrollIntoView({
+      block: "center",
+      behavior: "instant",
+      inline: "nearest"
+    })
+  }, [currentDate, eventsGroupByDayWithRefs]);
 
   return (
     <>
-      <div className="relative flex-1 flex items-center justify-center">
-        <div className="flex h-full max-h-[50rem] w-4/5 xl:w-3/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary">
-          <div className="flex justify-between break-words rounded-xl px-2">
-            <div className="my-auto">
-              <h1> Event for day {selectedDate}</h1>
-            </div>
-            <AddEventToProject projectId={projectId} />
-          </div>
-          <main className="flex min-h-0 flex-col gap-4 overflow-y-auto p-6 scrollbar scrollbar-track-background scrollbar-thumb-primary">
-            {eventsGroupByDay[selectedDate]?.map((event) => {
-              return (
-                <div
-                  key={event.id}
-                  className="flex flex-col gap-4 break-words rounded-xl p-6 shadow-md shadow-muted"
+      <ProjectEventsView
+        events={events}
+        setEvents={setEvents}
+        projectId={projectId}
+        setCurrenctDate={setCurrentDate}
+        setScrollToIndex={setScrollToIndex}
+        scrollToIndex={scrollToIndex}
+        withoutAutoScroll={withoutAutoScroll}
+        setWithoutAutoScroll={setWithoutAutoScroll}
+      />
+      <div ref={timelineRef} className="relative h-28 min-h-28 px-8 overflow-x-auto overflow-y-hidden scrollbar scrollbar-track-background scrollbar-thumb-primary">
+        <div className="relative w-fit min-w-full h-full flex gap-10 border-b-2 border-secondary">
+          {Object.entries(eventsGroupByDayWithRefs).map(([date, data]) => {
+            return (
+              <div className="relative flex flex-col w-max items-center" key={date}>
+                <span className="w-max">{date.split("-").map(it => it.padStart(2, "0")).join("-")}</span>
+                <Link
+                  onClick={() => { setWithoutAutoScroll(true); setCurrentDate(date); setScrollToIndex(getScrollToIndex(events, date)) }}
+                  ref={data.ref}
+                  href={`/dashboard/${projectId}?date=${date}`}
+                  className={`min-w-8 min-h-8 w-8 h-8 z-10 rounded-3xl py-1 text-center shadow-lg ${currentDate === date ? "bg-primary shadow-primary" : "bg-secondary shadow-secondary"}`}
                 >
-                  <div className="flex gap-4 pb-4 border-b border-secondary">
-                    <img
-                      src={event.author.avatarUrl}
-                      alt="avatar"
-                      className="h-12 w-12 rounded-full"
-                    />
-                    <div>
-                      <div className="flex gap-2 items-center">
-                        <h1>{event.author.username}</h1>
-                        <h3 className="text-sm font-thin text-secondary-foreground">{event.happendAt.toLocaleTimeString()}</h3>
-                      </div>
-                      <h2>{event.author.email}</h2>
-                    </div>
-                  </div>
-                  <p className="pt-2">{event.content}</p>
-                </div>
-              );
-            })}
-          </main>
-        </div >
-      </div >
-
-      <div className="relative flex h-28 min-h-28 gap-8 border-b-2 border-secondary px-8">
-        {Object.entries(eventsGroupByDay).map(([date, events]) => {
-          return (
-            <Link
-              href={`/dashboard/${projectId}?date=${date}`}
-              key={date}
-              className={`style-for-timeline-dot-leg relative size-8 rounded-3xl py-1 text-center shadow-lg
-            ${selectedDate === date ? "bg-primary shadow-primary after:bg-primary" : "bg-secondary shadow-secondary after:bg-secondary "}
-          `}
-            >
-              <span className="absolute top-[-2rem] left-1/2 transform -translate-x-1/2 w-max h-10">{date.split('-').splice(0, 2).map(it => it.padStart(2, '0')).join('-')}</span>
-              {events.length}
-            </Link>
-          );
-        })}
+                  {data.events.length}
+                </Link>
+                <div className={`w-1 h-full ${currentDate === date ? "bg-primary" : "bg-secondary"}`}></div>
+              </div>
+            );
+          })}
+        </div>
       </div >
     </>
   );

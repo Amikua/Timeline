@@ -24,7 +24,102 @@ const removeUserFromProjectValidation = z.object({
 const addEventToProjectSchema = z.object({
   projectId: z.string().min(1),
   content: z.string().min(1),
+  happendAt: z.date().optional(),
 });
+
+const removeEventFromProjectSchema = z.object({
+  projectId: z.string().min(1),
+  eventId: z.string().min(1),
+});
+
+const getProjectEventsSchema = z.object({
+  projectId: z.string().min(1),
+  offset: z.number().int().optional().default(0),
+  firstRequest: z.boolean().optional().default(true),
+});
+
+const addRandomEventToProjectSchema = z.object({
+  projectId: z.string().min(1),
+  howMany: z.number().int().min(1),
+});
+
+export const addRandomEventsToProject = action(
+  addRandomEventToProjectSchema,
+  async ({ projectId, howMany }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+    try {
+      await db.projectEvent.createMany({
+        data: Array.from({ length: howMany }, () => ({
+          content: `Random event`,
+          happendAt: new Date(
+            Math.floor(
+              Math.random() * (Date.now() - 946684800000),
+            ) + 946684800000,
+          ),
+          projectId,
+          authorId: user.id,
+        })),
+      });
+    } catch (err) {
+      console.error(err);
+      revalidatePath(`/dashboard/${projectId}`);
+      return {
+        error: "Error creating event",
+      };
+    }
+  });
+
+
+export const getProjectEvents = action(
+  getProjectEventsSchema,
+  async ({ projectId, firstRequest, offset }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+
+    const size = 35;
+
+    const events = await db.projectEvent.findMany({
+      where: {
+        projectId,
+      },
+      orderBy: { happendAt: "desc" },
+      skip: offset,
+      take: size,
+      include: { author: true },
+    });
+
+    return {
+      events,
+      hasMore: events.length === size,
+    };
+  }
+);
+
+export const removeEventFromProject = action(
+  removeEventFromProjectSchema,
+  async ({ projectId, eventId }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+    await db.projectEvent.delete({
+      where: { id: eventId },
+    });
+
+    revalidatePath(`/dashboard/${projectId}`);
+  },
+);
 
 export const addUserToProject = action(
   addUsernameToProjectValidation,
@@ -71,7 +166,7 @@ export const removeUserFromProject = action(
 
 export const addEventToProject = action(
   addEventToProjectSchema,
-  async ({ projectId, content }) => {
+  async ({ projectId, content, happendAt }) => {
     const { user } = await validateRequest();
     if (!user) {
       return {
@@ -79,9 +174,10 @@ export const addEventToProject = action(
       };
     }
     try {
-      await db.projectEvent.create({
+      const event = await db.projectEvent.create({
         data: {
           content,
+          happendAt,
           author: {
             connect: {
               id: user.id,
@@ -93,9 +189,11 @@ export const addEventToProject = action(
             },
           },
         },
+        include: { author: true },
       });
       revalidatePath(`/dashboard/${projectId}`);
-    } catch(err) {
+      return { event };
+    } catch (err) {
       console.error(err);
       revalidatePath(`/dashboard/${projectId}`);
       return {
