@@ -110,7 +110,7 @@ export function Timeline({
                   href={`/dashboard/${projectId}?date=${date}`}
                   className={`min-w-8 min-h-8 w-8 h-8 z-10 rounded-3xl py-1 text-center shadow-lg ${currentDate === date ? "bg-primary shadow-primary" : "bg-secondary shadow-secondary"}`}
                 >
-                  {data.events.length}
+                  {data.events.length > 9 ? "9+" : data.events.length}
                 </Link>
                 <div className={`w-1 h-full ${currentDate === date ? "bg-primary" : "bg-secondary"}`}></div>
               </div>
