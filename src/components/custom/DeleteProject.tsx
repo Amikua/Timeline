@@ -10,43 +10,35 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { removeUserFromProject } from "./actions";
+import { deleteProject } from "./actions";
 import { type User } from "@prisma/client";
 
-export function RemoveUserFromProject({
+export function DeleteProject({
   user,
   projectId,
-  disabled,
-  text,
 }: {
   user: User;
   projectId: string;
-  disabled: boolean;
-  text: string;
 }) {
   return (
     <AlertDialog>
-      <AlertDialogTrigger
-        className="w-24 rounded-md bg-destructive px-4 hover:brightness-75 disabled:brightness-50"
-        disabled={disabled}
-      >
-        {text}
+      <AlertDialogTrigger className="h-[48px] w-[96px] rounded-md bg-destructive px-4 hover:brightness-75 disabled:brightness-50">
+        Delete
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Do you want to remove this user from the project?
-          </AlertDialogTitle>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone.
+            This action cannot be undone. This will permanently delete your
+            project.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>No</AlertDialogCancel>
           <AlertDialogAction
-            className="float-right bg-destructive hover:bg-destructive hover:brightness-150"
+            className="bg-destructive"
             onClick={async () => {
-              await removeUserFromProject({ id: user.id, projectId });
+              await deleteProject({ id: user.id, projectId });
             }}
           >
             Yes

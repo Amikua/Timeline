@@ -37,9 +37,9 @@ model Project {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   name      String   @db.VarChar(255)
-
-  authorId String
-  author   User   @relation("OwnedProjects", fields: [authorId], references: [id])
+  isActive  Boolean  @default(true)
+  authorId  String
+  author    User     @relation("OwnedProjects", fields: [authorId], references: [id])
 
   users    User[]
   unreadBy User[] @relation("UnreadProjects")

@@ -1,11 +1,13 @@
 import { AddUserToProject } from "~/components/custom/AddUserToProject";
 import { db } from "~/server/db";
 import Link from "next/link";
+import Image from "next/image";
 import { type User } from "lucia";
 import { validateRequest } from "~/lib/auth";
 import { redirect } from "next/navigation";
 import { RemoveUserFromProject } from "~/components/custom/RemoveUserFromProject";
-import Image from "next/image";
+import { DeleteProject } from "~/components/custom/DeleteProject";
+import { ChangeProjectStatus } from "~/components/custom/ChangeProjectStatus";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -26,24 +28,42 @@ function GoBackToProject({ projectId }: { projectId: string }) {
   );
 }
 
-function DisplayUser({ user, isCurrentUser, projectId, disabledRemoveButton }: { user: User, isCurrentUser: boolean, projectId: string, disabledRemoveButton: boolean }) {
+function DisplayUser({
+  user,
+  isCurrentUser,
+  projectId,
+  disabledRemoveButton,
+}: {
+  user: User;
+  isCurrentUser: boolean;
+  projectId: string;
+  disabledRemoveButton: boolean;
+}) {
   return (
-    <div className={`flex justify-between pb-4 ${isCurrentUser && 'border-b border-muted mb-2'}`}>
+    <div
+      className={`flex justify-between pb-4 ${isCurrentUser && "mb-2 border-b border-muted"}`}
+    >
       <div className="flex items-center gap-4">
-        <Image src={user.avatarUrl} alt="Current user avatar" width={40} height={40} className="size-10 rounded-full" />
+        <Image
+          src={user.avatarUrl}
+          alt="Current user avatar"
+          width={40}
+          height={40}
+          className="size-10 rounded-full"
+        />
         <div>
           <h1>{user.username}</h1>
           <h2>{user.email}</h2>
         </div>
-      </div >
+      </div>
       <RemoveUserFromProject
         disabled={disabledRemoveButton}
         projectId={projectId}
         user={user}
         text={isCurrentUser ? "Leave" : "Remove"}
       />
-    </ div >
-  )
+    </div>
+  );
 }
 
 export default async function Page({
@@ -64,27 +84,77 @@ export default async function Page({
     where: { projects: { some: { id: projectId } } },
   });
 
+  const project = await db.project.findFirst({
+    where: { id: projectId },
+    select: { isActive: true },
+  });
+  if (!project) {
+    return redirect("/");
+  }
+
   const disabledRemoveButton = allUsers.length < 2;
 
-
   return (
-    <div className="min-w-full max-w-full min-h-full max-h-full shadow-lg shadow-secondary rounded-2xl">
+    <div className="max-h-full min-h-full min-w-full max-w-full rounded-2xl shadow-lg shadow-secondary">
       <GoBackToProject projectId={projectId} />
-      <h1 className="mx-auto text-4xl px-16 w-11/12 text-center font-bold py-10 border-b-2 border-secondary">Project Settings</h1>
-      <div className="grid grid-cols-1 gap-4 xl:gap-0 xl:grid-cols-2 px-16 py-12">
-        <div className="flex flex-col gap-4 w-full">
-          <h1 className="text-2xl font-bold">Add New User</h1>
-          <h2 className="text-lg">Enter the username of the user to add to the project.</h2>
-          <AddUserToProject users={usersNotInProject} projectId={projectId} />
+      <h1 className="mx-auto w-11/12 border-b-2 border-secondary px-16 py-10 text-center text-4xl font-bold">
+        Project Settings
+      </h1>
+      <div className="grid grid-cols-1 gap-4 px-16 py-12 xl:grid-cols-2 xl:gap-0">
+        <div className="flex flex-col gap-8">
+          <div className="flex w-full flex-col gap-4">
+            <h1 className="text-2xl font-bold">Add New User</h1>
+            <h2 className="text-lg">
+              Enter the username of the user to add to the project.
+            </h2>
+            <AddUserToProject users={usersNotInProject} projectId={projectId} />
+          </div>
+          <div className="flex flex-col gap-4">
+            <h1 className="text-2xl font-bold">Project Status</h1>
+            <h2 className="text-lg">
+              This project is currently{" "}
+              {project.isActive ? "active" : "archived"}.
+            </h2>
+            <ChangeProjectStatus
+              user={currentUser}
+              projectId={projectId}
+              isActive={project.isActive}
+            >
+              {project.isActive ? "Finish" : "Reactivate"}
+            </ChangeProjectStatus>
+          </div>
+          <div className="flex flex-col gap-4">
+            <h1 className="text-2xl font-bold">Delete Project </h1>
+            <h2 className="text-lg">This action cannot be undone.</h2>
+            <DeleteProject
+              user={currentUser}
+              projectId={projectId}
+            ></DeleteProject>
+          </div>
         </div>
         <div className="flex flex-col gap-4">
           <h1 className="text-2xl font-bold">Current Users</h1>
-          <h2 className="text-lg">These are teh currenct users of your project.</h2>
+          <h2 className="text-lg">
+            These are the currenct users of your project.
+          </h2>
           <div className="flex flex-col gap-4 overflow-y-auto">
-            <DisplayUser user={currentUser} isCurrentUser={true} disabledRemoveButton={disabledRemoveButton} projectId={projectId} />
-            {allUsers.filter(user => user.username !== currentUser.username).map((user) => (
-              <DisplayUser key={user.id} user={user} isCurrentUser={false} disabledRemoveButton={disabledRemoveButton} projectId={projectId} />
-            ))}
+            <DisplayUser
+              user={currentUser}
+              isCurrentUser={true}
+              disabledRemoveButton={disabledRemoveButton}
+              projectId={projectId}
+            />
+            {allUsers
+              .filter((user) => user.username !== currentUser.username)
+              .map((user) => (
+                <DisplayUser
+                  key={user.id}
+                  user={user}
+                  isCurrentUser={false}
+                  disabledRemoveButton={disabledRemoveButton}
+                  projectId={projectId}
+                />
+              ))}
           </div>
         </div>
       </div>

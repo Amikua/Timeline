@@ -6,9 +6,16 @@ import { db } from "~/server/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { action } from "~/lib/safe-action";
+import { userAgent } from "next/server";
 
 const addProjectValidation = z.object({
   name: z.string().min(1),
+});
+
+const changeProjectStatusValidation = z.object({
+  id: z.string().min(1),
+  projectId: z.string().min(1),
+  isActive: z.boolean(),
 });
 
 const addUsernameToProjectValidation = z.object({
@@ -42,6 +49,11 @@ const addRandomEventToProjectSchema = z.object({
   howMany: z.number().int().min(1),
 });
 
+const deleteProjectValidation = z.object({
+  id: z.string().min(1),
+  projectId: z.string().min(1),
+});
+
 export const addRandomEventsToProject = action(
   addRandomEventToProjectSchema,
   async ({ projectId, howMany }) => {
@@ -56,9 +68,8 @@ export const addRandomEventsToProject = action(
         data: Array.from({ length: howMany }, () => ({
           content: `Random event`,
           happendAt: new Date(
-            Math.floor(
-              Math.random() * (Date.now() - 946684800000),
-            ) + 946684800000,
+            Math.floor(Math.random() * (Date.now() - 946684800000)) +
+              946684800000,
           ),
           projectId,
           authorId: user.id,
@@ -71,8 +82,8 @@ export const addRandomEventsToProject = action(
         error: "Error creating event",
       };
     }
-  });
-
+  },
+);
 
 export const getProjectEvents = action(
   getProjectEventsSchema,
@@ -100,7 +111,7 @@ export const getProjectEvents = action(
       events,
       hasMore: events.length === size,
     };
-  }
+  },
 );
 
 export const removeEventFromProject = action(
@@ -117,6 +128,40 @@ export const removeEventFromProject = action(
     });
 
     revalidatePath(`/dashboard/${projectId}`);
+  },
+);
+
+export const changeProjectStatus = action(
+  changeProjectStatusValidation,
+  async ({ projectId, isActive }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return { error: "Unauthorized" };
+    }
+
+    await db.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        isActive,
+      },
+    });
+    revalidatePath(`/dashboard`);
+  },
+);
+
+export const deleteProject = action(
+  deleteProjectValidation,
+  async ({ projectId }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return { error: "Unauthorized" };
+    }
+    await db.project.delete({
+      where: { id: projectId },
+    });
+    revalidatePath(`/dashboard`);
   },
 );
 
