@@ -4,49 +4,46 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { removeUserFromProject } from "./actions";
 import { type User } from "@prisma/client";
+import { changeProjectStatus } from "./actions";
 
-export function RemoveUserFromProject({
+export function ChangeProjectStatus({
   user,
   projectId,
-  disabled,
-  text,
+  isActive,
+  children,
 }: {
   user: User;
   projectId: string;
-  disabled: boolean;
-  text: string;
+  isActive: boolean;
+  children: React.ReactNode;
 }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger
-        className="w-24 rounded-md bg-destructive px-4 hover:brightness-75 disabled:brightness-50"
-        disabled={disabled}
+        className={`${isActive ? "bg-destructive" : "bg-green-700"} h-12 w-32 rounded-md bg-accent px-4 hover:brightness-75 disabled:brightness-50`}
       >
-        {text}
+        {children}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Do you want to remove this user from the project?
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone.
-          </AlertDialogDescription>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>No</AlertDialogCancel>
           <AlertDialogAction
-            className="float-right bg-destructive hover:bg-destructive hover:brightness-150"
+            className="bg-destructive"
             onClick={async () => {
-              await removeUserFromProject({ id: user.id, projectId });
+              await changeProjectStatus({
+                id: user.id,
+                projectId,
+                isActive: !isActive,
+              });
             }}
           >
             Yes
