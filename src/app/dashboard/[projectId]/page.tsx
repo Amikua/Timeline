@@ -1,5 +1,15 @@
 import Link from "next/link";
-import { TimelineWrapper } from "~/components/custom/TimelineWrapper";
+import { type Prisma } from "@prisma/client";
+import { redirect } from "next/navigation";
+import { validateRequest } from "~/lib/auth";
+import { Timeline } from "~/components/custom/Timeline";
+import { getProjectEvents } from "~/components/custom/actions";
+
+export type EventAndAuthor = Prisma.ProjectEventGetPayload<{
+  include: {
+    author: true;
+  };
+}>;
 
 function SettingsLink({ projectId }: { projectId: string }) {
   return (
@@ -51,10 +61,26 @@ export default async function Page({
   params: { projectId: string };
   searchParams: Record<string, string | undefined>;
 }) {
+  const [{ user }, response] = await Promise.all([
+    validateRequest(),
+    getProjectEvents({
+      projectId,
+    }),
+  ]);
+
+  const events = response?.data?.events;
+  if (!user || !events) {
+    return redirect("/");
+  }
   return (
     <>
       <SettingsLink projectId={projectId} />
-      <TimelineWrapper projectId={projectId} selectedDate={searchParams.date} />
+      <Timeline
+        projectId={projectId}
+        selectedDateFromSearchParams={searchParams.date}
+        events={events}
+        userId={user.id}
+      />
     </>
   );
 }

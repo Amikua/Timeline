@@ -6,7 +6,6 @@ import { db } from "~/server/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { action } from "~/lib/safe-action";
-import { userAgent } from "next/server";
 
 const addProjectValidation = z.object({
   name: z.string().min(1),
@@ -69,7 +68,7 @@ export const addRandomEventsToProject = action(
           content: `Random event`,
           happendAt: new Date(
             Math.floor(Math.random() * (Date.now() - 946684800000)) +
-              946684800000,
+            946684800000,
           ),
           projectId,
           authorId: user.id,
@@ -123,12 +122,20 @@ export const removeEventFromProject = action(
         error: "Unauthorized",
       };
     }
-    await db.projectEvent.delete({
-      where: { id: eventId },
-    });
+    try {
+      await db.projectEvent.delete({
+        where: { id: eventId, authorId: user.id },
+      });
 
-    revalidatePath(`/dashboard/${projectId}`);
-  },
+      revalidatePath(`/dashboard/${projectId}`);
+    } catch (err) {
+      console.error(err);
+      revalidatePath(`/dashboard/${projectId}`);
+      return {
+        error: "Error deleting event",
+      };
+    }
+  }
 );
 
 export const changeProjectStatus = action(

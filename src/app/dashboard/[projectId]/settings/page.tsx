@@ -76,18 +76,19 @@ export default async function Page({
     return redirect("/");
   }
 
-  const usersNotInProject = await db.user.findMany({
-    where: { NOT: { projects: { some: { id: projectId } } } },
-  });
+  const [usersNotInProject, allUsers, project] = await Promise.all([
+    db.user.findMany({
+      where: { NOT: { projects: { some: { id: projectId } } } },
+    }),
+    db.user.findMany({
+      where: { projects: { some: { id: projectId } } },
+    }),
+    db.project.findFirst({
+      where: { id: projectId },
+      select: { isActive: true },
+    }),
+  ]);
 
-  const allUsers = await db.user.findMany({
-    where: { projects: { some: { id: projectId } } },
-  });
-
-  const project = await db.project.findFirst({
-    where: { id: projectId },
-    select: { isActive: true },
-  });
   if (!project) {
     return redirect("/");
   }

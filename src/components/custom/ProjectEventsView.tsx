@@ -1,22 +1,26 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { AddEventToProject } from "./AddEventToProject";
-import { type EventAndAuthor } from "./TimelineWrapper";
+import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
 import { elementScroll, useVirtualizer, type VirtualizerOptions } from "@tanstack/react-virtual";
 import { getProjectEvents } from "./actions";
 import { removeEventFromProject } from "./actions";
 import Image from "next/image";
 
-function RemoveEventButton({ projectId, eventId, events, setEvents }: { projectId: string, eventId: string, events: EventAndAuthor[], setEvents: (events: EventAndAuthor[]) => void }) {
+function RemoveEventButton({ projectId, eventId, userId, events, setEvents }: { projectId: string, eventId: string, userId: string, events: EventAndAuthor[], setEvents: (events: EventAndAuthor[]) => void }) {
+  if (userId !== events.find(event => event.id === eventId)?.author.id) return null
   return (
-    <button onClick={async () => {
-      try {
-        await removeEventFromProject({ projectId, eventId })
-        setEvents(events.filter(event => event.id !== eventId))
-      } catch (error) {
-        console.error("Error removing event", error)
-      }
+    <button
+      onClick={async () => {
+        try {
+          const it = await removeEventFromProject({ projectId, eventId })
+          if (!it?.data?.error) {
+            setEvents(events.filter(event => event.id !== eventId))
+          }
+        } catch (error) {
+          console.error("Error removing event", error)
+        }
 
-    }} className="ml-auto" >
+      }} className="ml-auto" >
       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="red">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
       </svg>
@@ -24,7 +28,7 @@ function RemoveEventButton({ projectId, eventId, events, setEvents }: { projectI
   )
 }
 
-function easeInOutQuint(t: number) {
+export function easeInOutQuint(t: number) {
   return t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t
 }
 const estimatedSize = 280
@@ -37,7 +41,12 @@ export function ProjectEventsView({
   scrollToIndex,
   setScrollToIndex,
   withoutAutoScroll,
-  setWithoutAutoScroll
+  setWithoutAutoScroll,
+  hasMore,
+  setHasMore,
+  isFetchingNextPage,
+  setIsFetchingNextPage,
+  userId,
 }: {
   events: EventAndAuthor[];
   setEvents: (events: EventAndAuthor[]) => void;
@@ -47,9 +56,12 @@ export function ProjectEventsView({
   setScrollToIndex: (index: number | null) => void;
   withoutAutoScroll: boolean;
   setWithoutAutoScroll: (firstScroll: boolean) => void;
+  hasMore: boolean;
+  setHasMore: (hasMore: boolean) => void;
+  isFetchingNextPage: boolean;
+  setIsFetchingNextPage: (isFetchingNextPage: boolean) => void;
+  userId: string;
 }) {
-  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
 
   const scrollingRef = useRef<number>()
 
@@ -103,7 +115,7 @@ export function ProjectEventsView({
 
 
       if (currentlyViewed && !withoutAutoScroll) {
-        const currentEvent = events[currentlyViewed.index]
+        const currentEvent = events.at(currentlyViewed.index)
         if (!currentEvent) {
           console.error(`This should not happen, index: ${currentlyViewed.index}`)
           return
@@ -154,8 +166,8 @@ export function ProjectEventsView({
   ])
 
   return (
-    <div className="relative flex-1 flex items-center justify-center">
-      <div className="flex h-full max-h-[50rem] w-4/5 xl:w-3/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary">
+    <div className="relative max-h-[90%] py-16 flex-1 flex items-center justify-center">
+      <div className="flex h-full max-h-full w w-4/5 xl:w-3/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary">
         <div className="flex justify-between break-words rounded-xl px-8">
           <div className="my-auto">
             <h1>Project events</h1>
@@ -189,7 +201,7 @@ export function ProjectEventsView({
                       <div className="flex gap-2 items-center w-full">
                         <h1>{event.author.username}</h1>
                         <h3 className="text-sm font-thin text-secondary-foreground">{event.happendAt.toLocaleString()}</h3>
-                        <RemoveEventButton eventId={event.id} projectId={projectId} setEvents={setEvents} events={events} />
+                        <RemoveEventButton userId={userId} eventId={event.id} projectId={projectId} setEvents={setEvents} events={events} />
                       </div>
                       <h2>{event.author.email}</h2>
                     </div>
