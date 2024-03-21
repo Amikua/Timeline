@@ -16,7 +16,7 @@ export default async function RootLayout({
   const { user } = await validateRequest();
   if (!user) {
     return redirect("/");
-  }
+  };
   return (
     <div className="relative w-full max-w-full h-full flex">
       <Sidebar user={user} />

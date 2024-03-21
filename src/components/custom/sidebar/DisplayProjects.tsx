@@ -3,13 +3,22 @@ import { type Prisma } from "@prisma/client";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import tinycolor from 'tinycolor2';
+import { type filter } from "./FilterAndDisplayProjects";
 
 
-export function DisplayProjects({ projects }: { projects: ProjectWithAuthorAndUserCount[] }) {
+export function DisplayProjects({ projects, filter }: { projects: ProjectWithAuthorAndUserCount[], filter: filter }) {
   const params = useParams<{ projectId?: string }>();
   return (
     <main className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden  scrollbar scrollbar-thumb-primary scrollbar-track-background">
-      {projects.map((project) => (
+      {projects.filter((project) => {
+        if (filter === "all") {
+          return true;
+        } else if (filter === "active") {
+          return project.isActive;
+        } else if (filter === "archived") {
+          return !project.isActive;
+        }
+      }).map((project) => (
         <DisplayProject
           project={project}
           key={project.id}
@@ -39,9 +48,9 @@ function DisplayProject({ project, isActive = false }: { project: ProjectWithAut
   return (
     <Link href={`/dashboard/${project.id}`} className="max-w-[97%] pl-1">
       <div className={`flex flex-shrink-0 items-center gap-4  rounded-lg shadow shadow-gray-700 py-4 pl-4 hover:brightness-125 ${isActive ? "brightness-100" : "brightness-50"}`}>
-      <div className="flex min-w-[3rem] min-h-[3rem] size-12 items-center justify-center rounded-lg" style={{ backgroundColor: getColorForProjectName(project.name) }}>
-        <h1 className="text-2xl text-foreground">{project.name[0]}</h1>
-      </div>
+        <div className="flex min-w-[3rem] min-h-[3rem] size-12 items-center justify-center rounded-lg" style={{ backgroundColor: getColorForProjectName(project.name) }}>
+          <h1 className="text-2xl text-foreground">{project.name[0]}</h1>
+        </div>
 
         <div className="flex flex-col overflow-hidden">
           <h1 className="text-lg text-foreground w-full break-words">{project.name}</h1>
