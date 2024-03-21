@@ -49,7 +49,7 @@ function DisplayProject({ project, isActive = false }: { project: ProjectWithAut
     <Link href={`/dashboard/${project.id}`} className="max-w-[97%] pl-1">
       <div className={`flex flex-shrink-0 items-center gap-4  rounded-lg shadow shadow-gray-700 py-4 pl-4 hover:brightness-125 ${isActive ? "brightness-100" : "brightness-50"}`}>
       <div className="flex min-w-[3rem] min-h-[3rem] size-12 items-center justify-center rounded-lg" style={{ backgroundColor: project.isActive ? getColorForProjectName(project.name) :undefined}}>
-        <h1 className="text-2xl text-foreground">{project.isActive ? project.name[0]: <svg xmlns="http://www.w3.org/2000/svg" className="text-green-600" width="1em" height="1em"  viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M416 128L192 384l-96-96"/></svg>}</h1>
+        <h1 className="text-2xl text-foreground">{project.isActive ? project.name[0]: <svg xmlns="http://www.w3.org/2000/svg" className="text-green-600" width="1em" height="1em"  viewBox="0 0 512 512"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={32} d="M416 128L192 384l-96-96"/></svg>}</h1>
       </div>
 
         <div className="flex flex-col overflow-hidden">

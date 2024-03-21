@@ -1,34 +1,18 @@
 "use client";
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import Link from "next/link";
-import { ProjectEventsView, easeInOutQuint } from "./ProjectEventsView";
-import { type VirtualizerOptions, elementScroll, useVirtualizer } from "@tanstack/react-virtual";
-import { getProjectEvents } from "./actions";
+import { useState, useEffect,  useRef, useMemo } from "react";
+import { ProjectEventsView } from "./ProjectEventsView";
 import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
+import InfiniteScrollHorizontal from "./TimelineImplement";
 
-
-function useHorizontalScroll() {
-  const elRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = elRef.current;
-    if (el) {
-      const onWheel = (e: WheelEvent) => {
-        if (e.deltaY == 0) return;
-        e.preventDefault();
-        el.scrollBy(e.deltaY, 0);
-      };
-      el.addEventListener("wheel", onWheel);
-      return () => el.removeEventListener("wheel", onWheel);
-    }
-  }, []);
-  return elRef;
-}
-
-function getScrollToIndex(events: EventAndAuthor[], date: string) {
-  const index = events.findIndex(event => {
+export function getScrollToIndex(events: EventAndAuthor[], date: string) {
+  const index = events.findIndex((event) => {
     const [day, month, year] = date.split("-").map(Number);
     if (!day || !month || !year) return null;
-    return event.happendAt.getDate() === day && event.happendAt.getMonth() + 1 === month && event.happendAt.getFullYear() === year;
+    return (
+      event.happendAt.getDate() === day &&
+      event.happendAt.getMonth() + 1 === month &&
+      event.happendAt.getFullYear() === year
+    );
   });
   return index;
 }
@@ -50,24 +34,33 @@ export function Timeline({
   const [withoutAutoScroll, setWithoutAutoScroll] = useState(true);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const eventsGroupByDay = useMemo(() => events.reduce(
-    (acc, event) => {
-      const day = event.happendAt.getDate();
-      const month = event.happendAt.getMonth() + 1;
-      const year = event.happendAt.getFullYear();
-      const key = `${day}-${month}-${year}`;
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-      acc[key]!.push(event);
-      return acc;
-    },
-    {} as Record<string, EventAndAuthor[]>,
-  ), [events]);
+  const eventsGroupByDay = useMemo(
+    () =>
+      events.reduce(
+        (acc, event) => {
+          const day = event.happendAt.getDate();
+          const month = event.happendAt.getMonth() + 1;
+          const year = event.happendAt.getFullYear();
+          const key = `${day}-${month}-${year}`;
+          if (!acc[key]) {
+            acc[key] = [];
+          }
+          acc[key]!.push(event);
+          return acc;
+        },
+        {} as Record<string, EventAndAuthor[]>,
+      ),
+    [events],
+  );
 
-  const eventsGroupByDayKeys = useMemo(() => Object.keys(eventsGroupByDay), [eventsGroupByDay]);
+  const eventsGroupByDayKeys = useMemo(
+    () => Object.keys(eventsGroupByDay),
+    [eventsGroupByDay],
+  );
   // We always have at least one event
-  const [currentDate, setCurrentDate] = useState(selectedDateFromSearchParams ?? eventsGroupByDayKeys[0]!);
+  const [currentDate, setCurrentDate] = useState(
+    selectedDateFromSearchParams ?? eventsGroupByDayKeys.at(0)!,
+  );
   const [scrollToIndex, setScrollToIndex] = useState<number | null>(() => {
     if (selectedDateFromSearchParams) {
       return getScrollToIndex(events, selectedDateFromSearchParams);
@@ -75,92 +68,7 @@ export function Timeline({
     return null;
   });
 
-  // Virtual list stuff
-  const timelineRef = useHorizontalScroll();
-  const scrollingRef = useRef<number>()
 
-  const scrollToFn: VirtualizerOptions<HTMLDivElement, HTMLDivElement>['scrollToFn'] =
-    useCallback((offset, canSmooth, instance) => {
-      const duration = 1000
-      if (!timelineRef.current) return
-      const start = timelineRef.current.scrollLeft
-      const startTime = (scrollingRef.current = Date.now())
-
-      const run = () => {
-        if (scrollingRef.current !== startTime) return
-        const now = Date.now()
-        const elapsed = now - startTime
-        const progress = easeInOutQuint(Math.min(elapsed / duration, 1))
-        const interpolated = start + (offset - start) * progress
-
-        if (elapsed < duration) {
-          elementScroll(interpolated, canSmooth, instance)
-          requestAnimationFrame(run)
-        } else {
-          elementScroll(interpolated, canSmooth, instance)
-        }
-      }
-
-      requestAnimationFrame(run)
-    }, [])
-
-  const rowVirtualizer = useVirtualizer({
-    count: eventsGroupByDayKeys.length,
-    getScrollElement: () => timelineRef.current!,
-    estimateSize: () => 100,
-    horizontal: true,
-    overscan: 7,
-    scrollToFn
-  })
-
-  useEffect(() => {
-    const index = eventsGroupByDayKeys.findIndex(it => it === currentDate);
-    if (index && index === -1) return;
-    console.log("scrollToIndex", scrollToIndex)
-    rowVirtualizer.scrollToIndex(index, { align: "center" });
-  }, [currentDate]);
-
-  useEffect(() => {
-    (async () => {
-      const items = rowVirtualizer.getVirtualItems()
-      const lastItem = items[items.length - 1]
-
-      if (!lastItem) {
-        return
-      }
-
-      if (
-        lastItem.index >= eventsGroupByDayKeys.length - 1 &&
-        !isFetchingNextPage &&
-        hasMore &&
-        events.length
-      ) {
-        setIsFetchingNextPage(true)
-        try {
-          const response = await getProjectEvents({
-            projectId,
-            offset: events.length,
-          });
-          const newEvents = response.data!.events!;
-          setHasMore(response.data!.hasMore!);
-          if (Array.isArray(newEvents)) {
-            setEvents([...events, ...newEvents]);
-          } else {
-            setEvents([...events, newEvents]);
-          }
-        } catch (error) {
-          console.error("Error fetching next page", error)
-        }
-        setIsFetchingNextPage(false)
-      }
-    })().catch(console.error)
-  }, [
-    eventsGroupByDayKeys.length,
-    isFetchingNextPage,
-    hasMore,
-    projectId,
-    rowVirtualizer.getVirtualItems(),
-  ])
   return (
     <>
       <ProjectEventsView
@@ -179,8 +87,116 @@ export function Timeline({
         userId={userId}
         isActive={isActive}
       />
-      <div ref={timelineRef} className="relative shrink-0 h-28 min-h-28 px-8 overflow-x-auto overflow-y-hidden scrollbar scrollbar-track-background scrollbar-thumb-primary">
-        <div style={{ width: `${rowVirtualizer.getTotalSize()}px` }} className="relative min-w-full h-full flex gap-10 border-b-2 border-secondary">
+      <InfiniteScrollHorizontal
+        events={events}
+        setEvents={setEvents}
+        eventsGroupByDay={eventsGroupByDay}
+        eventsGroupByDayKeys={eventsGroupByDayKeys}
+        currentDate={currentDate}
+        hasMore={hasMore}
+        projectId={projectId}
+        setHasMore={setHasMore}
+        isFetchingNextPage={isFetchingNextPage}
+        setIsFetchingNextPage={setIsFetchingNextPage}
+        setWithoutAutoScroll={setWithoutAutoScroll}
+        setCurrentDate={setCurrentDate}
+        setScrollToIndex={setScrollToIndex}
+      />
+
+    </>
+  );
+} 
+
+ // Virtual list stuff
+  // const timelineRef = useHorizontalScroll();
+  // const scrollingRef = useRef<number>();
+
+  // const scrollToFn: VirtualizerOptions<
+  //   HTMLDivElement,
+  //   HTMLDivElement
+  // >["scrollToFn"] = useCallback((offset, canSmooth, instance) => {
+  //   const duration = 1000;
+  //   if (!timelineRef.current) return;
+  //   const start = timelineRef.current.scrollLeft;
+  //   const startTime = (scrollingRef.current = Date.now());
+
+  //   const run = () => {
+  //     if (scrollingRef.current !== startTime) return;
+  //     const now = Date.now();
+  //     const elapsed = now - startTime;
+  //     const progress = easeInOutQuint(Math.min(elapsed / duration, 1));
+  //     const interpolated = start + (offset - start) * progress;
+
+  //     if (elapsed < duration) {
+  //       elementScroll(interpolated, canSmooth, instance);
+  //       requestAnimationFrame(run);
+  //     } else {
+  //       elementScroll(interpolated, canSmooth, instance);
+  //     }
+  //   };
+
+  //   requestAnimationFrame(run);
+  // }, []);
+
+  // const rowVirtualizer = useVirtualizer({
+  //   count: eventsGroupByDayKeys.length,
+  //   getScrollElement: () => timelineRef.current!,
+  //   estimateSize: () => 100,
+  //   horizontal: true,
+  //   overscan: 7,
+  //   scrollToFn,
+  // });
+
+  // useEffect(() => {
+  //   const index = eventsGroupByDayKeys.findIndex((it) => it === currentDate);
+  //   if (index && index === -1) return;
+  //   console.log("scrollToIndex", scrollToIndex);
+  //   rowVirtualizer.scrollToIndex(index, { align: "center" });
+  // }, [currentDate]);
+
+  // useEffect(() => {
+  //   (async () => {
+  //     const items = rowVirtualizer.getVirtualItems();
+  //     const lastItem = items[items.length - 1];
+
+  //     if (!lastItem) {
+  //       return;
+  //     }
+
+  //     if (
+  //       lastItem.index >= eventsGroupByDayKeys.length - 1 &&
+  //       !isFetchingNextPage &&
+  //       hasMore &&
+  //       events.length
+  //     ) {
+  //       setIsFetchingNextPage(true);
+  //       try {
+  //         const response = await getProjectEvents({
+  //           projectId,
+  //           offset: events.length,
+  //         });
+  //         const newEvents = response.data!.events!;
+  //         setHasMore(response.data!.hasMore!);
+  //         if (Array.isArray(newEvents)) {
+  //           setEvents([...events, ...newEvents]);
+  //         } else {
+  //           setEvents([...events, newEvents]);
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching next page", error);
+  //       }
+  //       setIsFetchingNextPage(false);
+  //     }
+  //   })().catch(console.error);
+  // }, [
+  //   eventsGroupByDayKeys.length,
+  //   isFetchingNextPage,
+  //   hasMore,
+  //   projectId,
+  //   rowVirtualizer.getVirtualItems(),
+  // ]);
+      {/* <div ref={timelineRef} className="relative shrink-0 h-28 min-h-28 px-8 overflow-x-auto overflow-y-hidden scrollbar scrollbar-track-background scrollbar-thumb-primary">
+        <div style={{ width: `${rowVirtualizer.getTotalSize()}px` }} className="relative min-w-full h-full flex flex-row-reverse gap-10 border-b-2 border-secondary">
           {rowVirtualizer.getVirtualItems().map((virtualItem) => {
             const date = eventsGroupByDayKeys.at(virtualItem.index)!;
             const dateEvents = eventsGroupByDay[date]!;
@@ -204,7 +220,4 @@ export function Timeline({
             )
           })}
         </div>
-      </div >
-    </>
-  );
-}
+      </div > */}
