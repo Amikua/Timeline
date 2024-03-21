@@ -53,6 +53,28 @@ const deleteProjectValidation = z.object({
   projectId: z.string().min(1),
 });
 
+const getAllEventsValidation = z.object({
+  projectId: z.string().min(1),
+});
+
+export const getAllEvents = action(
+  getAllEventsValidation,
+  async ({ projectId }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unathorized",
+      };
+    }
+    const events = await db.projectEvent.findMany({
+      where: { id: projectId },
+      orderBy: { happendAt: "desc" },
+      include: { author: true },
+    });
+    return events;
+  },
+);
+
 export const addRandomEventsToProject = action(
   addRandomEventToProjectSchema,
   async ({ projectId, howMany }) => {

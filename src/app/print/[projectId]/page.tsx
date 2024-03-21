@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PrintEventsView } from "~/components/custom/PrintEventsView";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -6,7 +7,7 @@ function GoBackToProject({ projectId }: { projectId: string }) {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 16 16"
-        className="size-8 text-foreground hover:brightness-75"
+        className="size-8 hover:brightness-75 print:hidden"
       >
         <path
           fill="currentColor"
@@ -24,5 +25,10 @@ export default async function Page({
 }: {
   params: { projectId: string };
 }) {
-  return <GoBackToProject projectId={projectId} />;
+  return (
+    <div>
+      <PrintEventsView projectId={projectId} />
+      <GoBackToProject projectId={projectId} />
+    </div>
+  );
 }
