@@ -14,7 +14,7 @@ import { addEventToProject } from "~/components/custom/actions";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { Textarea } from "../ui/textarea";
 import { DateTimePicker } from "../ui/time-picker";
-import { type EventAndAuthor } from "./TimelineWrapper";
+import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
 
 function SubmitButton() {
   const status = useFormStatus();
