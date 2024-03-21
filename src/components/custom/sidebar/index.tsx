@@ -2,7 +2,7 @@ import { db } from "~/server/db";
 import { AddProject } from "./AddProject";
 import { type User } from "lucia";
 import { DisplayUser } from "./DisplayUser";
-import { DisplayProjects } from "./DisplayProjects";
+import { FilterAndDisplayProjects } from "./FilterAndDisplayProjects";
 // import { Suspense } from "react";
 // import { Skeleton } from "~/components/ui/skeleton";
 
@@ -31,7 +31,7 @@ import { DisplayProjects } from "./DisplayProjects";
 //   );
 // }
 
-async function GetAndDisplayProjects({ user }: { user: User }) {
+export default async function Sidebar({ user }: { user: User }) {
   const projects = await db.project.findMany({
     where: {
       users: {
@@ -54,21 +54,11 @@ async function GetAndDisplayProjects({ user }: { user: User }) {
   });
 
   return (
-    <DisplayProjects projects={projects} />
-  );
-}
-
-
-export default async function Sidebar({ user }: { user: User }) {
-
-  return (
     <nav className="relative h-screen min-w-96 max-w-96 border-r border-gray-700" >
       <div className="flex gap-12 h-full max-h-full flex-col justify-between px-6 pt-12">
         <div className="flex flex-col gap-6 flex-1 min-h-0">
           <DisplayUser user={user} />
-          {/* <Suspense fallback={<DisplaySkeletonProjects />}> */}
-          <GetAndDisplayProjects user={user} />
-          {/* </Suspense> */}
+          <FilterAndDisplayProjects projects={projects} />
         </div>
         <AddProject />
       </div>
