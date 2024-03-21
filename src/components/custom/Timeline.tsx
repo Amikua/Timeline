@@ -38,11 +38,13 @@ export function Timeline({
   selectedDateFromSearchParams,
   events: defaultEvents,
   userId,
+  isActive,
 }: {
   projectId: string;
   selectedDateFromSearchParams?: string;
   events: EventAndAuthor[];
   userId: string;
+  isActive: boolean;
 }) {
   const [events, setEvents] = useState(defaultEvents);
   const [withoutAutoScroll, setWithoutAutoScroll] = useState(true);
@@ -63,8 +65,9 @@ export function Timeline({
     {} as Record<string, EventAndAuthor[]>,
   ), [events]);
 
+  const eventsGroupByDayKeys = useMemo(() => Object.keys(eventsGroupByDay), [eventsGroupByDay]);
   // We always have at least one event
-  const [currentDate, setCurrentDate] = useState(selectedDateFromSearchParams ?? Object.keys(eventsGroupByDay)[0]!);
+  const [currentDate, setCurrentDate] = useState(selectedDateFromSearchParams ?? eventsGroupByDayKeys[0]!);
   const [scrollToIndex, setScrollToIndex] = useState<number | null>(() => {
     if (selectedDateFromSearchParams) {
       return getScrollToIndex(events, selectedDateFromSearchParams);
@@ -101,7 +104,6 @@ export function Timeline({
       requestAnimationFrame(run)
     }, [])
 
-  const eventsGroupByDayKeys = useMemo(() => Object.keys(eventsGroupByDay), [eventsGroupByDay]);
   const rowVirtualizer = useVirtualizer({
     count: eventsGroupByDayKeys.length,
     getScrollElement: () => timelineRef.current!,
@@ -175,6 +177,7 @@ export function Timeline({
         isFetchingNextPage={isFetchingNextPage}
         setIsFetchingNextPage={setIsFetchingNextPage}
         userId={userId}
+        isActive={isActive}
       />
       <div ref={timelineRef} className="relative shrink-0 h-28 min-h-28 px-8 overflow-x-auto overflow-y-hidden scrollbar scrollbar-track-background scrollbar-thumb-primary">
         <div style={{ width: `${rowVirtualizer.getTotalSize()}px` }} className="relative min-w-full h-full flex gap-10 border-b-2 border-secondary">

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { validateRequest } from "~/lib/auth";
 import { Timeline } from "~/components/custom/Timeline";
 import { getProjectEvents } from "~/components/custom/actions";
+import { db } from "~/server/db";
 
 export type EventAndAuthor = Prisma.ProjectEventGetPayload<{
   include: {
@@ -61,11 +62,15 @@ export default async function Page({
   params: { projectId: string };
   searchParams: Record<string, string | undefined>;
 }) {
-  const [{ user }, response] = await Promise.all([
+  const [{ user }, response, project] = await Promise.all([
     validateRequest(),
     getProjectEvents({
       projectId,
     }),
+    db.project.findFirst({
+      where: { id: projectId },
+      select: { isActive: true },
+    })
   ]);
 
   const events = response?.data?.events;
@@ -80,6 +85,7 @@ export default async function Page({
         selectedDateFromSearchParams={searchParams.date}
         events={events}
         userId={user.id}
+        isActive={project?.isActive ?? false}
       />
     </>
   );

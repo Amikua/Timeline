@@ -247,6 +247,15 @@ export const addEventToProject = action(
       };
     }
     try {
+      const project = await db.project.findFirst({
+        where: { id: projectId },
+        select: { isActive: true },
+      });
+      if (!project?.isActive) {
+        return {
+          error: "Project is not active",
+        };
+      }
       const event = await db.projectEvent.create({
         data: {
           content,

@@ -25,7 +25,7 @@ function SubmitButton() {
   );
 }
 
-export function AddEventToProject({ projectId, events, setEvents }: { projectId: string; events: EventAndAuthor[]; setEvents: (events: EventAndAuthor[]) => void }) {
+export function AddEventToProject({ projectId, isActive, events, setEvents }: { projectId: string; isActive: boolean; events: EventAndAuthor[]; setEvents: (events: EventAndAuthor[]) => void }) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>();
 
@@ -34,7 +34,8 @@ export function AddEventToProject({ projectId, events, setEvents }: { projectId:
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="rounded-lg border-2 border-border py-6 my-auto"
+          disabled={!isActive}
+          className="rounded-lg border-2 border-border py-6 my-auto disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add event
         </Button>

@@ -47,6 +47,7 @@ export function ProjectEventsView({
   isFetchingNextPage,
   setIsFetchingNextPage,
   userId,
+  isActive,
 }: {
   events: EventAndAuthor[];
   setEvents: (events: EventAndAuthor[]) => void;
@@ -61,6 +62,7 @@ export function ProjectEventsView({
   isFetchingNextPage: boolean;
   setIsFetchingNextPage: (isFetchingNextPage: boolean) => void;
   userId: string;
+  isActive: boolean;
 }) {
 
   const scrollingRef = useRef<number>()
@@ -172,7 +174,7 @@ export function ProjectEventsView({
           <div className="my-auto">
             <h1>Project events</h1>
           </div>
-          <AddEventToProject projectId={projectId} events={events} setEvents={setEvents} />
+          <AddEventToProject projectId={projectId} events={events} setEvents={setEvents} isActive={isActive} />
         </div>
         <div
           ref={parentRef}
