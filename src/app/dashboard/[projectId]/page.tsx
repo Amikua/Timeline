@@ -57,10 +57,8 @@ function SettingsLink({ projectId }: { projectId: string }) {
 
 export default async function Page({
   params: { projectId },
-  searchParams,
 }: {
   params: { projectId: string };
-  searchParams: Record<string, string | undefined>;
 }) {
   const [{ user }, response, project] = await Promise.all([
     validateRequest(),
@@ -82,7 +80,6 @@ export default async function Page({
       <SettingsLink projectId={projectId} />
       <Timeline
         projectId={projectId}
-        selectedDateFromSearchParams={searchParams.date}
         events={events}
         userId={user.id}
         isActive={project?.isActive ?? false}

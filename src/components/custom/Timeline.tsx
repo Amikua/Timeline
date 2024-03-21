@@ -19,7 +19,6 @@ export function getScrollToIndex(events: EventAndAuthor[], date: string) {
 
 export function Timeline({
   projectId,
-  selectedDateFromSearchParams,
   events: defaultEvents,
   userId,
   isActive,
@@ -58,16 +57,8 @@ export function Timeline({
     [eventsGroupByDay],
   );
   // We always have at least one event
-  const [currentDate, setCurrentDate] = useState(
-    selectedDateFromSearchParams ?? eventsGroupByDayKeys.at(0)!,
-  );
-  const [scrollToIndex, setScrollToIndex] = useState<number | null>(() => {
-    if (selectedDateFromSearchParams) {
-      return getScrollToIndex(events, selectedDateFromSearchParams);
-    }
-    return null;
-  });
-
+  const [currentDate, setCurrentDate] = useState(eventsGroupByDayKeys.at(0)!);
+  const [scrollToIndex, setScrollToIndex] = useState<number | null>(null)
 
   return (
     <>
