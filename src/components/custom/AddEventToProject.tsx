@@ -58,7 +58,7 @@ export function AddEventToProject({ projectId, isActive, events, setEvents }: { 
               });
               setOpen(false);
               const event = response.data!.event!;
-              setEvents([event, ...events]);
+              setEvents([event, ...events].sort((a, b) => new Date(b.happendAt).getTime() - new Date(a.happendAt).getTime()));
             } catch (error) {
               console.error("Error while adding event", error);
             }
