@@ -8,11 +8,22 @@ import { FilterProjects } from "./FilterProjects"
 export type filter = "active" | "archived" | 'all'
 
 export function FilterAndDisplayProjects({ projects }: { projects: ProjectWithAuthorAndUserCount[] }) {
-  const [filter, setFilter] = useState<filter>('all')
+  // const [filter, setFilter] = useState<filter>('all')
+  const [projectStatusFilter, setProjectStatusFilter] = useState<filter>('all')
+  const [projectNameFilter, setProjectNameFilter] = useState<string>('')
   return (
     <>
-      <FilterProjects filter={filter} setFilter={setFilter} />
-      <DisplayProjects projects={projects} filter={filter} />
+      <FilterProjects
+        projectStatusFilter={projectStatusFilter}
+        setProjectStatusFilter={setProjectStatusFilter}
+        projectNameFilter={projectNameFilter}
+        setProjectNameFilter={setProjectNameFilter}
+       />
+      <DisplayProjects
+        projects={projects}
+        projectStatusFilter={projectStatusFilter}
+        projectNameFilter={projectNameFilter}
+      />
     </>
   )
 }
