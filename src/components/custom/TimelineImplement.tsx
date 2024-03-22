@@ -69,7 +69,11 @@ export function InfiniteScrollHorizontal({
   useEffect(() => {
     if (currentDateRef.current) {
       // The behavior and block options ensure smooth center alignment
-      currentDateRef.current.scrollIntoView({ block: "end"});
+      currentDateRef.current.scrollIntoView({ 
+        behavior: 'auto',
+        block: 'center',
+        inline: 'center'
+      });
     }
   }, [currentDate, eventsGroupByDay, currentDateRef]); // Depend on currentDate and eventsGroupByDay
 
