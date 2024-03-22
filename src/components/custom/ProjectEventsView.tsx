@@ -6,10 +6,11 @@ import { getProjectEvents } from "./actions";
 import { removeEventFromProject } from "./actions";
 import Image from "next/image";
 
-function RemoveEventButton({ projectId, eventId, userId, events, setEvents }: { projectId: string, eventId: string, userId: string, events: EventAndAuthor[], setEvents: (events: EventAndAuthor[]) => void }) {
+function RemoveEventButton({ projectId, eventId, userId, events, setEvents, isActive }: { projectId: string, eventId: string, userId: string, events: EventAndAuthor[], setEvents: (events: EventAndAuthor[]) => void, isActive: boolean }) {
   if (userId !== events.find(event => event.id === eventId)?.author.id) return null
   return (
     <button
+      disabled={!isActive}
       onClick={async () => {
         try {
           const it = await removeEventFromProject({ projectId, eventId })
@@ -20,7 +21,7 @@ function RemoveEventButton({ projectId, eventId, userId, events, setEvents }: { 
           console.error("Error removing event", error)
         }
 
-      }} className="ml-auto" >
+      }} className="ml-auto disabled:hidden" >
       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="red">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
       </svg>
@@ -203,7 +204,7 @@ export function ProjectEventsView({
                       <div className="flex gap-2 items-center w-full">
                         <h1>{event.author.username}</h1>
                         <h3 className="text-sm font-thin text-secondary-foreground">{event.happendAt.toLocaleString()}</h3>
-                        <RemoveEventButton userId={userId} eventId={event.id} projectId={projectId} setEvents={setEvents} events={events} />
+                        <RemoveEventButton isActive={isActive} userId={userId} eventId={event.id} projectId={projectId} setEvents={setEvents} events={events} />
                       </div>
                       <h2>{event.author.email}</h2>
                     </div>
