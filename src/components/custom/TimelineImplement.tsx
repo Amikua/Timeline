@@ -2,34 +2,48 @@ import React, { useEffect, useRef } from "react";
 import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
 import { getProjectEvents } from "./actions";
 import Link from "next/link";
+import { difference } from "next/dist/build/utils";
 
 function getScrollToIndex(events: EventAndAuthor[], date: string) {
-    const index = events.findIndex(event => {
-      const [day, month, year] = date.split("-").map(Number);
-      if (!day || !month || !year) return null;
-      return event.happendAt.getDate() === day && event.happendAt.getMonth() + 1 === month && event.happendAt.getFullYear() === year;
-    });
-    return index;
-  }
+  const index = events.findIndex(event => {
+    const [day, month, year] = date.split("-").map(Number);
+    if (!day || !month || !year) return null;
+    return event.happendAt.getDate() === day && event.happendAt.getMonth() + 1 === month && event.happendAt.getFullYear() === year;
+  });
+  return index;
+}
 
 function useHorizontalScroll() {
-    const elRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-      const el = elRef.current;
-      if (el) {
-        const onWheel = (e: WheelEvent) => {
-          if (e.deltaY == 0) return;
-          e.preventDefault();
-          el.scrollBy(e.deltaY, 0);
-        };
-        el.addEventListener("wheel", onWheel);
-        return () => el.removeEventListener("wheel", onWheel);
-      }
-    }, []);
-    return elRef;
-  }
+  const elRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = elRef.current;
+    if (el) {
+      const onWheel = (e: WheelEvent) => {
+        if (e.deltaY == 0) return;
+        e.preventDefault();
+        el.scrollBy(e.deltaY, 0);
+      };
+      el.addEventListener("wheel", onWheel);
+      return () => el.removeEventListener("wheel", onWheel);
+    }
+  }, []);
+  return elRef;
+}
 
-
+const monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 export function InfiniteScrollHorizontal({
   events,
@@ -69,7 +83,7 @@ export function InfiniteScrollHorizontal({
   useEffect(() => {
     if (currentDateRef.current) {
       // The behavior and block options ensure smooth center alignment
-      currentDateRef.current.scrollIntoView({ 
+      currentDateRef.current.scrollIntoView({
         behavior: 'auto',
         block: 'center',
         inline: 'center'
@@ -130,26 +144,42 @@ export function InfiniteScrollHorizontal({
   return (
     <div
       ref={listContainerRef}
-      className="relative h-28 min-h-28 shrink-0 overflow-x-auto overflow-y-hidden px-8 scrollbar scrollbar-track-background scrollbar-thumb-primary"
+      className="relative h-32 min-h-32 shrink-0 overflow-auto px-8 scrollbar scrollbar scrollbar-track-background scrollbar-thumb-background"
     >
-      <div className="relative flex h-full w-fit min-w-full flex-row-reverse gap-10 border-b-2 border-secondary">
+      <div className="relative flex h-full w-fit min-w-full flex-row-reverse border-b-2 border-secondary">
         {Object.entries(eventsGroupByDay).map(([date, data], index) => {
+          // Date is in format dd-mm-yyyy
+          const [day, month, year] = date.split("-").map(Number);
+          const currentDateObj = new Date(year!, month! - 1, day);
+          let differenceInDays = 0;
+          let absoluteDifferenceInMonths = 0;
+          if (index !== 0) {
+            const [prevDay, prevMonth, prevYear] = eventsGroupByDayKeys[index - 1]!.split("-").map(Number);
+            const prevDateObj = new Date(prevYear!, prevMonth! - 1, prevDay);
+            differenceInDays = Math.floor((prevDateObj.getTime() - currentDateObj.getTime()) / (1000 * 60 * 60 * 24));
+            // For prev date 08-02-2021 and current date 29-01-2021, the difference in months should be 1
+            // For prev date 08-02-2022 and current date 08-02-2021, the difference in months should be 12
+            absoluteDifferenceInMonths = Math.abs(prevDateObj.getMonth() - currentDateObj.getMonth() + (12 * (prevDateObj.getFullYear() - currentDateObj.getFullYear())));
+          }
+
           return (
             <div
               className="relative flex w-max flex-col items-center"
-              ref={(el)=> {
+              style={{ marginRight: `${2 + differenceInDays}rem` }}
+
+              ref={(el) => {
                 if (currentDate === date) {
-                    // @ts-expect-error Hack to make multiple refs work
-                    currentDateRef.current = el;
+                  // @ts-expect-error Hack to make multiple refs work
+                  currentDateRef.current = el;
                 }
                 if (eventsGroupByDayKeys.length > 5) {
-                    if (index === eventsGroupByDayKeys.length - 5) {
-                    // @ts-expect-error Hack to make multiple refs work
-                        lastItemRef.current = el;
-                    }
-                } else if (index === eventsGroupByDayKeys.length - 1) {
+                  if (index === eventsGroupByDayKeys.length - 5) {
                     // @ts-expect-error Hack to make multiple refs work
                     lastItemRef.current = el;
+                  }
+                } else if (index === eventsGroupByDayKeys.length - 1) {
+                  // @ts-expect-error Hack to make multiple refs work
+                  lastItemRef.current = el;
                 }
               }}
               key={date}
@@ -174,6 +204,13 @@ export function InfiniteScrollHorizontal({
               <div
                 className={`h-full w-1 ${currentDate === date ? "bg-primary" : "bg-secondary"}`}
               ></div>
+              {absoluteDifferenceInMonths > 0 && (
+                <h3
+                  className={`absolute -right-2/3 top-0 text-center text-sm h-full w-8 [writing-mode:vertical-lr]`}
+                >
+                  {`${monthNames[currentDateObj.getMonth()]} ${currentDateObj.getFullYear()}`}
+                </h3>
+              )}
             </div>
           );
         })}

@@ -9,7 +9,7 @@ export type filter = "active" | "archived" | 'all'
 
 export function FilterAndDisplayProjects({ projects }: { projects: ProjectWithAuthorAndUserCount[] }) {
   // const [filter, setFilter] = useState<filter>('all')
-  const [projectStatusFilter, setProjectStatusFilter] = useState<filter>('all')
+  const [projectStatusFilter, setProjectStatusFilter] = useState<filter>('active')
   const [projectNameFilter, setProjectNameFilter] = useState<string>('')
   return (
     <>
@@ -18,7 +18,7 @@ export function FilterAndDisplayProjects({ projects }: { projects: ProjectWithAu
         setProjectStatusFilter={setProjectStatusFilter}
         projectNameFilter={projectNameFilter}
         setProjectNameFilter={setProjectNameFilter}
-       />
+      />
       <DisplayProjects
         projects={projects}
         projectStatusFilter={projectStatusFilter}
