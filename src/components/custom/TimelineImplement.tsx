@@ -153,15 +153,21 @@ export function InfiniteScrollHorizontal({
           const currentDateObj = new Date(year!, month! - 1, day);
           let differenceInDays = 0;
           let absoluteDifferenceInMonths = 0;
-          let previousDateObj = undefined;
+          let nextDateObj = undefined;
 
           if (index !== 0) {
             const [prevDay, prevMonth, prevYear] = eventsGroupByDayKeys[index - 1]!.split("-").map(Number);
-            previousDateObj = new Date(prevYear!, prevMonth! - 1, prevDay);
+            const previousDateObj = new Date(prevYear!, prevMonth! - 1, prevDay);
             differenceInDays = Math.floor((previousDateObj.getTime() - currentDateObj.getTime()) / (1000 * 60 * 60 * 24));
+          }
+
+          if (index !== eventsGroupByDayKeys.length - 1) {
+            const [nextDay, nextMonth, nextYear] = eventsGroupByDayKeys[index + 1]!.split("-").map(Number);
+            nextDateObj = new Date(nextYear!, nextMonth! - 1, nextDay);
             // For prev date 08-02-2021 and current date 29-01-2021, the difference in months should be 1
             // For prev date 08-02-2022 and current date 08-02-2021, the difference in months should be 12
-            absoluteDifferenceInMonths = Math.abs(previousDateObj.getMonth() - currentDateObj.getMonth() + (12 * (previousDateObj.getFullYear() - currentDateObj.getFullYear())));
+            // absoluteDifferenceInMonths = Math.abs(previousDateObj.getMonth() - currentDateObj.getMonth() + (12 * (previousDateObj.getFullYear() - currentDateObj.getFullYear())));
+            absoluteDifferenceInMonths = Math.abs(nextDateObj.getMonth() - currentDateObj.getMonth() + (12 * (nextDateObj.getFullYear() - currentDateObj.getFullYear())));
           }
 
           return (
@@ -206,11 +212,11 @@ export function InfiniteScrollHorizontal({
               <div
                 className={`h-full w-1 ${currentDate === date ? "bg-primary" : "bg-secondary"}`}
               ></div>
-              {(absoluteDifferenceInMonths > 0 && previousDateObj) && (
+              {(absoluteDifferenceInMonths > 0 && nextDateObj) && (
                 <h3
-                  className={`absolute -right-2/3 top-0 text-center text-sm h-full w-8 [writing-mode:vertical-lr]`}
+                  className={`absolute -left-2/3 top-0 text-center text-sm h-full w-8 [writing-mode:vertical-lr]`}
                 >
-                  {`${monthNames[previousDateObj.getMonth()]} ${currentDateObj.getFullYear()}`}
+                  {`${monthNames[currentDateObj.getMonth()]} ${currentDateObj.getFullYear()}`}
                 </h3>
               )}
             </div>
