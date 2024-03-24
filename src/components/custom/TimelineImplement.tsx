@@ -12,7 +12,6 @@ function getScrollToIndex(events: EventAndAuthor[], date: string) {
   });
   return index;
 }
-
 function useHorizontalScroll() {
   const elRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -144,7 +143,7 @@ export function InfiniteScrollHorizontal({
   return (
     <div
       ref={listContainerRef}
-      className="relative h-32 min-h-32 shrink-0 overflow-auto px-8 scrollbar scrollbar scrollbar-track-background scrollbar-thumb-background"
+      className="relative h-36 min-h-36 shrink-0 overflow-auto px-8 scrollbar scrollbar scrollbar-track-background scrollbar-thumb-background"
     >
       <div className="relative flex h-full w-fit min-w-full flex-row-reverse border-b-2 border-secondary">
         {Object.entries(eventsGroupByDay).map(([date, data], index) => {
@@ -192,7 +191,7 @@ export function InfiniteScrollHorizontal({
               }}
               key={date}
             >
-              <span className="w-max">
+              <span className="w-max text-xs pb-1">
                 {date
                   .split("-")
                   .map((it) => it.padStart(2, "0"))
@@ -214,7 +213,7 @@ export function InfiniteScrollHorizontal({
               ></div>
               {(absoluteDifferenceInMonths > 0 && nextDateObj) && (
                 <h3
-                  className={`absolute -left-2/3 top-0 text-center text-sm h-full w-8 [writing-mode:vertical-lr]`}
+                  className={`absolute -left-2/3 top-0 text-center font-thin h-full w-8 [writing-mode:vertical-lr]`}
                 >
                   {`${monthNames[currentDateObj.getMonth()]} ${currentDateObj.getFullYear()}`}
                 </h3>
