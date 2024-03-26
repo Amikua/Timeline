@@ -4,13 +4,14 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import tinycolor from "tinycolor2";
 import { type filter } from "./FilterAndDisplayProjects";
+import Image from "next/image";
 
 export function DisplayProjects({
   projects,
   projectStatusFilter,
   projectNameFilter,
 }: {
-  projects: ProjectWithAuthorAndUserCount[];
+  projects: ProjectWithAuthorAndUsers[];
   projectStatusFilter: filter;
   projectNameFilter: string;
 }) {
@@ -57,9 +58,12 @@ function DisplayProject({
   project,
   isActive = false,
 }: {
-  project: ProjectWithAuthorAndUserCount;
+  project: ProjectWithAuthorAndUsers;
   isActive?: boolean;
 }) {
+  // Slice the users array to display only the first three users
+  const displayedUsers = project.users.slice(0, 3);
+
   return (
     <Link href={`/dashboard/${project.id}`} className="max-w-[97%] pl-1">
       <div
@@ -105,15 +109,38 @@ function DisplayProject({
             Creator: {project.author.username}
           </h2>
         </div>
-        <h2 className="ml-auto mr-4 min-w-max text-sm text-foreground">
-          Users: {project._count.users}
-        </h2>
+        
+        <div className="ml-auto mr-4 min-w-max flex items-center space-x-[-4px] relative">
+          {displayedUsers.map((user, index) => (
+            <div key={index} className="relative" style={{ zIndex: displayedUsers.length - index }}>
+              <Image
+                alt={`Avatar of users`}
+                width={32}
+                height={32}
+                className="size-4 rounded-2xl"
+                src={user.avatarUrl}
+              />
+              <style jsx>{`
+                .relative {
+                  position: relative;
+                  left: ${index === 0 ? 0 : -1}px;
+                }
+              `}</style>
+            </div>
+          ))}
+          {project._count.users > 3 && (
+            <div className="relative left-[6px]">
+              <h2 className="text-sm text-foreground">+{project._count.users - 3}</h2>
+            </div>
+          )}
+        </div>
       </div>
     </Link>
   );
 }
 
-export type ProjectWithAuthorAndUserCount = Prisma.ProjectGetPayload<{
+
+export type ProjectWithAuthorAndUsers = Prisma.ProjectGetPayload<{
   include: {
     author: {
       select: {
@@ -125,5 +152,10 @@ export type ProjectWithAuthorAndUserCount = Prisma.ProjectGetPayload<{
         users: true;
       };
     };
+    users: {
+      select: {
+        avatarUrl: true;
+      }
+    }
   };
 }>;

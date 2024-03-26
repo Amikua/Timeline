@@ -44,6 +44,9 @@ export default async function Sidebar({ user }: { user: User }) {
       author: {
         select: { username: true }
       },
+      users: {
+        select: {avatarUrl: true}
+      },
       _count: {
         select: { users: true }
       }
