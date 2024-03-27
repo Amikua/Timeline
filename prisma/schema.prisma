@@ -52,10 +52,20 @@ model ProjectEvent {
   createdAt DateTime @default(now())
   happendAt DateTime @default(now())
   content   String   @db.VarChar(255)
+  category  Category
 
   authorId String
   author   User   @relation(references: [id], fields: [authorId], onDelete: Cascade)
 
   projectId String
   Project   Project @relation(references: [id], fields: [projectId], onDelete: Cascade)
+}
+
+enum Category {
+  ISSUE
+  BUG
+  FEATURES
+  WIP
+  ZAP
+  TADA
 }
