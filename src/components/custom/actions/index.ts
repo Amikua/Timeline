@@ -6,6 +6,7 @@ import { db } from "~/server/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { action } from "~/lib/safe-action";
+import { $Enums, Category } from "@prisma/client";
 
 const addProjectValidation = z.object({
   name: z.string().min(1),
@@ -31,6 +32,7 @@ const addEventToProjectSchema = z.object({
   projectId: z.string().min(1),
   content: z.string().min(1),
   happendAt: z.date().optional(),
+  category: z.nativeEnum(Category),
 });
 
 const removeEventFromProjectSchema = z.object({
@@ -90,10 +92,11 @@ export const addRandomEventsToProject = action(
           content: `Random event`,
           happendAt: new Date(
             Math.floor(Math.random() * (Date.now() - 946684800000)) +
-            946684800000,
+              946684800000,
           ),
           projectId,
           authorId: user.id,
+          category: "WIP",
         })),
       });
     } catch (err) {
@@ -157,7 +160,7 @@ export const removeEventFromProject = action(
         error: "Error deleting event",
       };
     }
-  }
+  },
 );
 
 export const changeProjectStatus = action(
@@ -239,7 +242,7 @@ export const removeUserFromProject = action(
 
 export const addEventToProject = action(
   addEventToProjectSchema,
-  async ({ projectId, content, happendAt }) => {
+  async ({ projectId, content, happendAt, category }) => {
     const { user } = await validateRequest();
     if (!user) {
       return {
@@ -260,6 +263,7 @@ export const addEventToProject = action(
         data: {
           content,
           happendAt,
+          category,
           author: {
             connect: {
               id: user.id,
@@ -309,6 +313,7 @@ export async function addProjectAction(formData: FormData) {
         create: {
           authorId: user.id,
           content: `Created project ${validatedFields.data.name}`,
+          category: "TADA",
         },
       },
       author: {
