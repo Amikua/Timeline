@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PrintEventsView } from "~/components/custom/PrintEventsView";
+import { AutoPrint } from "./autoprint";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -25,10 +26,13 @@ export default async function Page({
 }: {
   params: { projectId: string };
 }) {
+
+  
   return (
     <div>
       <PrintEventsView projectId={projectId} />
       <GoBackToProject projectId={projectId} />
+      <AutoPrint/>
     </div>
   );
 }
