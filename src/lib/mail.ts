@@ -36,7 +36,7 @@ const processEmail = async (parsed: ParsedMail, username: string) => {
       .map((address) => address.address)
       .filter((it) => it !== undefined)
       .forEach((address) => {
-        const projectId = address.split("@")[0]?.split("+")[1];
+        const projectId = address?.split("@")[0]?.split("+")[1];
         if (!projectId) {
           console.error("No projectId found in email address");
           return;
