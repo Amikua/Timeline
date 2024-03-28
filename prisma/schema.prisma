@@ -68,4 +68,14 @@ enum Category {
   WIP
   ZAP
   TADA
+  AMBULANCE
+  ROCKET
+  CHECKMARK
+  LOCK
+  PENCIL
+  REWIND
+  BULB
+  SPEECH
+  PHONE
+  RUBBISH
 }

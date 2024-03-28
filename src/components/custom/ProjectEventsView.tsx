@@ -239,7 +239,7 @@ export function ProjectEventsView({
                 >
                   <div className="flex w-full gap-4 border-b border-secondary py-4">
                     <div className="h-12 w-12 rounded-full text-4xl">
-                      {categoryEmotes[event.category]}
+                      {categoryEmotes[event.category].emoji}
                     </div>
                     {/* <Image
                       src={event.author.avatarUrl}

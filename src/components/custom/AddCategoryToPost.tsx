@@ -19,12 +19,22 @@ import {
 import { type $Enums, Category } from "@prisma/client";
 
 export const categoryEmotes = {
-  ISSUE: "💥",
-  BUG: "🐛",
-  FEATURES: "✨",
-  WIP: "🚧",
-  ZAP: "⚡️",
-  TADA: "🎉",
+  SPEECH: { emoji: "💬", label: "Chat" },
+  ISSUE: { emoji: "🔥", label: "Issue" },
+  BUG: { emoji: "🐛", label: "Bug" },
+  FEATURES: { emoji: "✨", label: "Features" },
+  WIP: { emoji: "🚧", label: "Work in Progress" },
+  ZAP: { emoji: "⚡️", label: "Performance" },
+  TADA: { emoji: "🎉", label: "Start" },
+  AMBULANCE: { emoji: "🚨", label: "Alarm" },
+  ROCKET: { emoji: "🚀", label: "Deployment" },
+  CHECKMARK: { emoji: "✅", label: "Completion" },
+  LOCK: { emoji: "🔒️", label: "Security" },
+  PENCIL: { emoji: "✏️", label: "Sketch" },
+  REWIND: { emoji: "⏪️", label: "Revert" },
+  BULB: { emoji: "💡", label: "Idea" },
+  PHONE: { emoji: "📱", label: "Mobile" },
+  RUBBISH: { emoji: "🗑️", label: "Rubbish" },
 };
 
 export function AddCategoryToPost({
@@ -37,7 +47,7 @@ export function AddCategoryToPost({
   const [open, setOpen] = useState(false);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -46,13 +56,13 @@ export function AddCategoryToPost({
           className="w-[280px] justify-between"
         >
           {selectedCategory
-            ? `${categoryEmotes[selectedCategory as keyof typeof categoryEmotes]} ${selectedCategory}`
-            : "Select category..."}
+            ? `${categoryEmotes[selectedCategory].emoji} ${categoryEmotes[selectedCategory].label}`
+            : `${categoryEmotes.SPEECH.emoji} ${categoryEmotes.SPEECH.label}`}
 
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-0">
+      <PopoverContent className=" max-h-44 w-[280px] overflow-y-auto p-0 scrollbar-none">
         <Command>
           <CommandInput placeholder="Search category..." />
           <CommandEmpty>No category found.</CommandEmpty>
@@ -79,7 +89,7 @@ export function AddCategoryToPost({
                       : "opacity-0",
                   )}
                 />
-                {`${categoryEmotes[categoryValue]} ${categoryValue}`}
+                {`${categoryEmotes[categoryValue].emoji} ${categoryEmotes[categoryValue].label}`}
               </CommandItem>
             ))}
           </CommandGroup>
