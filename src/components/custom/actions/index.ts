@@ -1,12 +1,19 @@
 "use server";
 import { lucia, validateRequest } from "~/lib/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { z } from "zod";
 import { db } from "~/server/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { action } from "~/lib/safe-action";
-import { $Enums, Category } from "@prisma/client";
+import { Category } from "@prisma/client";
+import { readEmails } from "~/lib/mail";
+import { env } from "~/env";
+import { EVENTS_PER_REQUEST } from "~/constants";
+
+export const checkForEventFromEmailCached = unstable_cache(checkForEventFromEmail, ['checkForEventFromEmail'], {
+  revalidate: env.READ_EMAILS_EVERY_N_SECONDS
+}); 
 
 const addProjectValidation = z.object({
   name: z.string().min(1),
@@ -58,6 +65,21 @@ const deleteProjectValidation = z.object({
 const getAllEventsValidation = z.object({
   projectId: z.string().min(1),
 });
+
+export async function checkForEventFromEmail() {
+  if (!env.GMAIL_USERNAME || !env.GMAIL_PASSWORD) {
+    console.warn("GMAIL_USER or GMAIL_PASSWORD not found in env");
+    return;
+  }
+
+  try {
+    await readEmails(env.GMAIL_USERNAME, env.GMAIL_PASSWORD);
+    revalidatePath("/")
+  } catch(err) {
+    // console.error(err);
+  }
+  return {}
+}
 
 export const getAllEvents = action(
   getAllEventsValidation,
@@ -119,21 +141,19 @@ export const getProjectEvents = action(
       };
     }
 
-    const size = 35;
-
     const events = await db.projectEvent.findMany({
       where: {
         projectId,
       },
       orderBy: { happendAt: "desc" },
       skip: offset,
-      take: size,
+      take: EVENTS_PER_REQUEST,
       include: { author: true },
     });
 
     return {
       events,
-      hasMore: events.length === size,
+      hasMore: events.length === EVENTS_PER_REQUEST,
     };
   },
 );

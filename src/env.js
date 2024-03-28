@@ -22,6 +22,9 @@ export const env = createEnv({
       (str) => !str.includes("YOUR_GITHUB_CLIENT_SECRET_HERE"),
         "You forgot to set the GITHUB_CLIENT_SECRET in the .env file."
     ),
+    GMAIL_USERNAME: z.string().email().optional(),
+    GMAIL_PASSWORD: z.string().optional(),
+    READ_EMAILS_EVERY_N_SECONDS: z.coerce.number().default(60 * 60),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -45,6 +48,9 @@ export const env = createEnv({
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
     NODE_ENV: process.env.NODE_ENV,
+    GMAIL_USERNAME: process.env.GMAIL_USERNAME,
+    GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
+    READ_EMAILS_EVERY_N_SECONDS: process.env.READ_EMAILS_EVERY_N_SECONDS,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { RemoveUserFromProject } from "~/components/custom/RemoveUserFromProject";
 import { DeleteProject } from "~/components/custom/DeleteProject";
 import { ChangeProjectStatus } from "~/components/custom/ChangeProjectStatus";
+import { env } from "~/env";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -76,6 +77,11 @@ export default async function Page({
     return redirect("/");
   }
 
+  const mainEmail = env.GMAIL_USERNAME;
+  const projectEmail = mainEmail
+    ? `${mainEmail.split("@")[0]}+${projectId}@${mainEmail.split("@")[1]}`
+    : null;
+
   const [usersNotInProject, allUsers, project] = await Promise.all([
     db.user.findMany({
       where: { NOT: { projects: { some: { id: projectId } } } },
@@ -132,6 +138,14 @@ export default async function Page({
               projectId={projectId}
             ></DeleteProject>
           </div>
+          {projectEmail && (
+            <div className="flex flex-col gap-4">
+              <h1 className="text-2xl font-bold">Project Email</h1>
+              <Link href={`mailto:${projectEmail}`} className="text-lg font-thin text-link underline">
+                {projectEmail}
+              </Link>
+            </div>
+          )}
         </div>
         <div className="flex flex-col gap-4">
           <h1 className="text-2xl font-bold">Current Users</h1>

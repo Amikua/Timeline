@@ -41,8 +41,8 @@ export function AddCategoryToPost({
   selectedCategory,
   setSelectedCategory,
 }: {
-  selectedCategory: $Enums.Category | "";
-  setSelectedCategory: (selectedCategory: $Enums.Category | "") => void;
+  selectedCategory: $Enums.Category;
+  setSelectedCategory: (selectedCategory: $Enums.Category) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -55,9 +55,7 @@ export function AddCategoryToPost({
           aria-expanded={open}
           className="w-[280px] justify-between"
         >
-          {selectedCategory
-            ? `${categoryEmotes[selectedCategory].emoji} ${categoryEmotes[selectedCategory].label}`
-            : `${categoryEmotes.SPEECH.emoji} ${categoryEmotes.SPEECH.label}`}
+          {`${categoryEmotes[selectedCategory].emoji} ${categoryEmotes[selectedCategory].label}`}
 
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -74,9 +72,7 @@ export function AddCategoryToPost({
                 className="cursor-pointer"
                 onSelect={(currentValue) => {
                   setSelectedCategory(
-                    currentValue === selectedCategory.toUpperCase()
-                      ? ""
-                      : (currentValue.toUpperCase() as $Enums.Category),
+                    currentValue.toUpperCase() as $Enums.Category,
                   );
                   setOpen(false);
                 }}

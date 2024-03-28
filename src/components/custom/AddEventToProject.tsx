@@ -40,9 +40,8 @@ export function AddEventToProject({
 }) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>();
-  const [selectedCategory, setSelectedCategory] = useState<
-    $Enums.Category | ""
-  >("");
+  const [selectedCategory, setSelectedCategory] =
+    useState<$Enums.Category>("SPEECH");
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -66,7 +65,6 @@ export function AddEventToProject({
           action={async (formData: FormData) => {
             if (!selectedCategory) return;
             try {
-              console.log("here");
               const response = await addEventToProject({
                 projectId,
                 happendAt: date,
