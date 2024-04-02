@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
 import { getProjectEvents } from "./actions";
 import Link from "next/link";
-import { difference } from "next/dist/build/utils";
 
 function getScrollToIndex(events: EventAndAuthor[], date: string) {
   const index = events.findIndex(event => {

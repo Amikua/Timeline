@@ -25,6 +25,7 @@ export const env = createEnv({
     GMAIL_USERNAME: z.string().email().optional(),
     GMAIL_PASSWORD: z.string().optional(),
     READ_EMAILS_EVERY_N_SECONDS: z.coerce.number().default(60 * 60),
+    DB_LOG: z.enum(["none", "basic", "verbose"]).default("basic"),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -51,6 +52,7 @@ export const env = createEnv({
     GMAIL_USERNAME: process.env.GMAIL_USERNAME,
     GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
     READ_EMAILS_EVERY_N_SECONDS: process.env.READ_EMAILS_EVERY_N_SECONDS,
+    DB_LOG: process.env.DB_LOG,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

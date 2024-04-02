@@ -60,7 +60,7 @@ export default async function Page({
 }: {
   params: { projectId: string };
 }) {
-  const [{ user }, response, project] = await Promise.all([
+  const [{ user }, response, project, _] = await Promise.all([
     validateRequest(),
     getProjectEvents({
       projectId,
@@ -68,7 +68,8 @@ export default async function Page({
     db.project.findFirst({
       where: { id: projectId },
       select: { isActive: true },
-    })
+    }),
+    new Promise((resolve) => setTimeout(resolve, 300)),
   ]);
 
   const events = response?.data?.events;

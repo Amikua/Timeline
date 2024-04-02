@@ -4,19 +4,22 @@ import { env } from "~/env";
 
 const createPrismaClient = () => {
   const client = new PrismaClient({
-    log:
-      env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-    // log: env.NODE_ENV === "development" ? [{
-    //   emit: 'event',
-    //   level: 'query',
-    // },] : ["error"],
+    log: env.NODE_ENV !== "development" ? ["error"]
+      : env.DB_LOG === "verbose"
+        ? [{ emit: "event", level: "query" }]
+        : env.DB_LOG === "basic"
+        ? ["query"]
+        : undefined 
   });
-  // if (env.NODE_ENV === "development") {
-  //   client.$on("query", (e) => {
-  //     console.log("Query: ", e.query);
-  //     console.log("Duration: ", e.duration);
-  //   })
-  // }
+  if (env.NODE_ENV === "development" && env.DB_LOG === "verbose") {
+    // @ts-expect-error If DB_LOG is verbose then we will have query and duration
+    client.$on("query", (e) => {
+    // @ts-expect-error If DB_LOG is verbose then we will have query and duration
+      console.log("Query: ", e.query);
+    // @ts-expect-error If DB_LOG is verbose then we will have query and duration
+      console.log("Duration: ", e.duration);
+    })
+  }
   return client
 }
 const globalForPrisma = globalThis as unknown as {
