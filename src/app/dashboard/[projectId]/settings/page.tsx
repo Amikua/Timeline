@@ -9,6 +9,7 @@ import { RemoveUserFromProject } from "~/components/custom/RemoveUserFromProject
 import { DeleteProject } from "~/components/custom/DeleteProject";
 import { ChangeProjectStatus } from "~/components/custom/ChangeProjectStatus";
 import { env } from "~/env";
+import { DisplayProjectApiKey } from "~/components/custom/DisplayProjectApiKey";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -91,7 +92,7 @@ export default async function Page({
     }),
     db.project.findFirst({
       where: { id: projectId },
-      select: { isActive: true },
+      select: { isActive: true, apiKey: true},
     }),
   ]);
 
@@ -138,6 +139,7 @@ export default async function Page({
               projectId={projectId}
             ></DeleteProject>
           </div>
+          <DisplayProjectApiKey apiKey={project.apiKey} />
           {projectEmail && (
             <div className="flex flex-col gap-4">
               <h1 className="text-2xl font-bold">Project Email</h1>

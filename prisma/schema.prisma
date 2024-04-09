@@ -37,6 +37,7 @@ model Project {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   name      String   @db.VarChar(255)
+  apiKey    String   @default(uuid())
   isActive  Boolean  @default(true)
   authorId  String
   author    User     @relation("OwnedProjects", fields: [authorId], references: [id])

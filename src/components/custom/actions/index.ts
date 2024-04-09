@@ -1,70 +1,33 @@
 "use server";
 import { lucia, validateRequest } from "~/lib/auth";
 import { revalidatePath, unstable_cache } from "next/cache";
-import { z } from "zod";
 import { db } from "~/server/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { action } from "~/lib/safe-action";
-import { Category } from "@prisma/client";
 import { readEmails } from "~/lib/mail";
 import { env } from "~/env";
 import { EVENTS_PER_REQUEST } from "~/constants";
+import {
+  getAllEventsValidation,
+  addRandomEventToProjectSchema,
+  getProjectEventsSchema,
+  removeEventFromProjectSchema,
+  changeProjectStatusValidation,
+  deleteProjectValidation,
+  addUsernameToProjectValidation,
+  removeUserFromProjectValidation,
+  addEventToProjectSchema,
+  addProjectValidation,
+} from "../schemas";
 
-export const checkForEventFromEmailCached = unstable_cache(checkForEventFromEmail, ['checkForEventFromEmail'], {
-  revalidate: env.READ_EMAILS_EVERY_N_SECONDS
-}); 
-
-const addProjectValidation = z.object({
-  name: z.string().min(1),
-});
-
-const changeProjectStatusValidation = z.object({
-  id: z.string().min(1),
-  projectId: z.string().min(1),
-  isActive: z.boolean(),
-});
-
-const addUsernameToProjectValidation = z.object({
-  id: z.string().min(1),
-  projectId: z.string().min(1),
-});
-
-const removeUserFromProjectValidation = z.object({
-  id: z.string().min(1),
-  projectId: z.string().min(1),
-});
-
-const addEventToProjectSchema = z.object({
-  projectId: z.string().min(1),
-  content: z.string().min(1),
-  happendAt: z.date().optional(),
-  category: z.nativeEnum(Category),
-});
-
-const removeEventFromProjectSchema = z.object({
-  projectId: z.string().min(1),
-  eventId: z.string().min(1),
-});
-
-const getProjectEventsSchema = z.object({
-  projectId: z.string().min(1),
-  offset: z.number().int().optional().default(0),
-});
-
-const addRandomEventToProjectSchema = z.object({
-  projectId: z.string().min(1),
-  howMany: z.number().int().min(1),
-});
-
-const deleteProjectValidation = z.object({
-  id: z.string().min(1),
-  projectId: z.string().min(1),
-});
-
-const getAllEventsValidation = z.object({
-  projectId: z.string().min(1),
-});
+export const checkForEventFromEmailCached = unstable_cache(
+  checkForEventFromEmail,
+  ["checkForEventFromEmail"],
+  {
+    revalidate: env.READ_EMAILS_EVERY_N_SECONDS,
+  },
+);
 
 export async function checkForEventFromEmail() {
   if (!env.GMAIL_USERNAME || !env.GMAIL_PASSWORD) {
@@ -74,11 +37,11 @@ export async function checkForEventFromEmail() {
 
   try {
     await readEmails(env.GMAIL_USERNAME, env.GMAIL_PASSWORD);
-    revalidatePath("/")
-  } catch(err) {
+    revalidatePath("/");
+  } catch (err) {
     // console.error(err);
   }
-  return {}
+  return {};
 }
 
 export const getAllEvents = action(
