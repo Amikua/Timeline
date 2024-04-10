@@ -1,24 +1,29 @@
-import { z } from "zod"
+import { z } from "zod";
 import { Category } from "@prisma/client";
 
-export const addProjectValidation = z.object({
+export const addProjectSchema = z.object({
   name: z.string().min(1),
 });
 
-export const changeProjectStatusValidation = z.object({
+export const changeProjectStatusSchema = z.object({
   id: z.string().min(1),
   projectId: z.string().min(1),
   isActive: z.boolean(),
 });
 
-export const addUsernameToProjectValidation = z.object({
+export const addUsernameToProjectSchema = z.object({
   id: z.string().min(1),
   projectId: z.string().min(1),
 });
 
-export const removeUserFromProjectValidation = z.object({
+export const removeUserFromProjectSchema = z.object({
   id: z.string().min(1),
   projectId: z.string().min(1),
+});
+
+export const getAllEventsWithFilterSchema = z.object({
+  projectId: z.string().min(1),
+  filter: z.nativeEnum(Category),
 });
 
 export const addEventToProjectSchema = z.object({
@@ -43,12 +48,11 @@ export const addRandomEventToProjectSchema = z.object({
   howMany: z.number().int().min(1),
 });
 
-export const deleteProjectValidation = z.object({
+export const deleteProjectSchema = z.object({
   id: z.string().min(1),
   projectId: z.string().min(1),
 });
 
-export const getAllEventsValidation = z.object({
+export const getAllEventsSchema = z.object({
   projectId: z.string().min(1),
 });
-

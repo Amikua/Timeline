@@ -5,6 +5,7 @@ import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
 import InfiniteScrollHorizontal from "./TimelineImplement";
 import { EVENTS_PER_REQUEST } from "~/constants";
 import { checkForEventFromEmailCached } from "./actions";
+import { Category } from "@prisma/client";
 
 export function getScrollToIndex(events: EventAndAuthor[], date: string) {
   const index = events.findIndex((event) => {
@@ -20,11 +21,13 @@ export function getScrollToIndex(events: EventAndAuthor[], date: string) {
 }
 
 export function Timeline({
+  projectName,
   projectId,
   events: defaultEvents,
   userId,
   isActive,
 }: {
+  projectName: string;
   projectId: string;
   selectedDateFromSearchParams?: string;
   events: EventAndAuthor[];
@@ -32,12 +35,17 @@ export function Timeline({
   isActive: boolean;
 }) {
   const [events, setEvents] = useState(defaultEvents);
+  const [filter, setFilter] = useState<Category | "">("");
+  const filteredEvents = useMemo(
+    () => events.filter((event) => (filter ? event.category === filter : true)),
+    [events, filter],
+  );
   const [withoutAutoScroll, setWithoutAutoScroll] = useState(true);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const [hasMore, setHasMore] = useState(events.length === EVENTS_PER_REQUEST);
   const eventsGroupByDay = useMemo(
     () =>
-      events.reduce(
+      filteredEvents.reduce(
         (acc, event) => {
           const day = event.happendAt.getDate();
           const month = event.happendAt.getMonth() + 1;
@@ -51,7 +59,7 @@ export function Timeline({
         },
         {} as Record<string, EventAndAuthor[]>,
       ),
-    [events],
+    [filteredEvents],
   );
 
   const eventsGroupByDayKeys = useMemo(
@@ -69,11 +77,19 @@ export function Timeline({
     return () => clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    setHasMore(true)
+  }, [filter])
+
   return (
     <>
       <ProjectEventsView
         events={events}
         setEvents={setEvents}
+        filter={filter}
+        setFilter={setFilter}
+        filteredEvents={filteredEvents}
+        projectName={projectName}
         projectId={projectId}
         setCurrenctDate={setCurrentDate}
         setScrollToIndex={setScrollToIndex}
@@ -92,6 +108,7 @@ export function Timeline({
         setEvents={setEvents}
         eventsGroupByDay={eventsGroupByDay}
         eventsGroupByDayKeys={eventsGroupByDayKeys}
+        filter={filter}
         currentDate={currentDate}
         hasMore={hasMore}
         projectId={projectId}

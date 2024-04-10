@@ -9,16 +9,17 @@ import { readEmails } from "~/lib/mail";
 import { env } from "~/env";
 import { EVENTS_PER_REQUEST } from "~/constants";
 import {
-  getAllEventsValidation,
+  getAllEventsSchema,
   addRandomEventToProjectSchema,
   getProjectEventsSchema,
   removeEventFromProjectSchema,
-  changeProjectStatusValidation,
-  deleteProjectValidation,
-  addUsernameToProjectValidation,
-  removeUserFromProjectValidation,
+  changeProjectStatusSchema,
+  deleteProjectSchema,
+  addUsernameToProjectSchema,
+  removeUserFromProjectSchema,
   addEventToProjectSchema,
-  addProjectValidation,
+  addProjectSchema,
+  getAllEventsWithFilterSchema,
 } from "../schemas";
 
 export const checkForEventFromEmailCached = unstable_cache(
@@ -45,7 +46,7 @@ export async function checkForEventFromEmail() {
 }
 
 export const getAllEvents = action(
-  getAllEventsValidation,
+  getAllEventsSchema,
   async ({ projectId }) => {
     const { user } = await validateRequest();
     if (!user) {
@@ -121,6 +122,32 @@ export const getProjectEvents = action(
   },
 );
 
+export const getAllProjectEventsWithFilter = action(
+  getAllEventsWithFilterSchema,
+  async ({ projectId, filter }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+
+    const events = await db.projectEvent.findMany({
+      where: {
+        projectId,
+        category: filter,
+      },
+      orderBy: { happendAt: "desc" },
+      include: { author: true },
+    });
+
+    return {
+      events,
+      hasMore: false,
+    };
+  },
+);
+
 export const removeEventFromProject = action(
   removeEventFromProjectSchema,
   async ({ projectId, eventId }) => {
@@ -147,7 +174,7 @@ export const removeEventFromProject = action(
 );
 
 export const changeProjectStatus = action(
-  changeProjectStatusValidation,
+  changeProjectStatusSchema,
   async ({ projectId, isActive }) => {
     const { user } = await validateRequest();
     if (!user) {
@@ -167,7 +194,7 @@ export const changeProjectStatus = action(
 );
 
 export const deleteProject = action(
-  deleteProjectValidation,
+  deleteProjectSchema,
   async ({ projectId }) => {
     const { user } = await validateRequest();
     if (!user) {
@@ -181,7 +208,7 @@ export const deleteProject = action(
 );
 
 export const addUserToProject = action(
-  addUsernameToProjectValidation,
+  addUsernameToProjectSchema,
   async ({ id, projectId }) => {
     const { user } = await validateRequest();
     if (!user) {
@@ -199,7 +226,7 @@ export const addUserToProject = action(
 );
 
 export const removeUserFromProject = action(
-  removeUserFromProjectValidation,
+  removeUserFromProjectSchema,
   async ({ id, projectId }) => {
     const { user } = await validateRequest();
     if (!user) {
@@ -279,7 +306,7 @@ export async function addProjectAction(formData: FormData) {
       error: "Unauthorized",
     };
   }
-  const validatedFields = addProjectValidation.safeParse({
+  const validatedFields = addProjectSchema.safeParse({
     name: formData.get("name"),
   });
 

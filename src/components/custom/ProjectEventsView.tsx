@@ -6,10 +6,11 @@ import {
   useVirtualizer,
   type VirtualizerOptions,
 } from "@tanstack/react-virtual";
-import { getProjectEvents } from "./actions";
+import { getAllProjectEventsWithFilter, getProjectEvents } from "./actions";
 import { removeEventFromProject } from "./actions";
-// import Image from "next/image";
 import { categoryEmotes } from "./AddCategoryToPost";
+import { Category } from "@prisma/client";
+import { EventsFilter } from "./EventsFilter";
 
 function RemoveEventButton({
   projectId,
@@ -69,6 +70,9 @@ const estimatedSize = 280;
 export function ProjectEventsView({
   events,
   setEvents,
+  filter,
+  setFilter,
+  filteredEvents,
   projectId,
   setCurrenctDate,
   scrollToIndex,
@@ -81,9 +85,13 @@ export function ProjectEventsView({
   setIsFetchingNextPage,
   userId,
   isActive,
+  projectName,
 }: {
   events: EventAndAuthor[];
   setEvents: (events: EventAndAuthor[]) => void;
+  filter: Category | "";
+  setFilter: (filter: Category | "") => void;
+  filteredEvents: EventAndAuthor[];
   projectId: string;
   setCurrenctDate: (date: string) => void;
   scrollToIndex: number | null;
@@ -96,6 +104,7 @@ export function ProjectEventsView({
   setIsFetchingNextPage: (isFetchingNextPage: boolean) => void;
   userId: string;
   isActive: boolean;
+  projectName: string;
 }) {
   const scrollingRef = useRef<number>();
 
@@ -129,7 +138,7 @@ export function ProjectEventsView({
 
   const parentRef = useRef<HTMLDivElement>(null);
   const rowVirtualizer = useVirtualizer({
-    count: events.length,
+    count: filteredEvents.length,
     getScrollElement: () => parentRef.current!,
     estimateSize: () => estimatedSize,
     overscan: 3,
@@ -150,7 +159,7 @@ export function ProjectEventsView({
       const currentlyViewed = items[items.length / 2 - 1];
 
       if (currentlyViewed && !withoutAutoScroll) {
-        const currentEvent = events.at(currentlyViewed.index);
+        const currentEvent = filteredEvents.at(currentlyViewed.index);
         if (!currentEvent) {
           console.error(
             `This should not happen, index: ${currentlyViewed.index}`,
@@ -169,17 +178,19 @@ export function ProjectEventsView({
       }
 
       if (
-        lastItem.index >= events.length - 1 &&
+        lastItem.index >= filteredEvents.length - 1 &&
         !isFetchingNextPage &&
         hasMore &&
-        events.length
+        filteredEvents.length
       ) {
         setIsFetchingNextPage(true);
         try {
-          const response = await getProjectEvents({
-            projectId,
-            offset: events.length,
-          });
+          const response = filter
+            ? await getAllProjectEventsWithFilter({ projectId, filter })
+            : await getProjectEvents({
+                projectId,
+                offset: events.length,
+              });
           const newEvents = response.data!.events!;
           setHasMore(response.data!.hasMore!);
           if (Array.isArray(newEvents)) {
@@ -194,7 +205,8 @@ export function ProjectEventsView({
       }
     })().catch(console.error);
   }, [
-    events.length,
+    filteredEvents.length,
+    filter,
     isFetchingNextPage,
     hasMore,
     projectId,
@@ -204,11 +216,13 @@ export function ProjectEventsView({
 
   return (
     <div className="relative flex max-h-[90%] flex-1 items-center justify-center py-16">
-      <div className="w flex h-full max-h-full w-4/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary xl:w-3/5">
+      <div className="relative flex h-full max-h-full w-4/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary xl:w-3/5">
         <div className="flex justify-between break-words rounded-xl px-8">
           <div className="my-auto">
-            <h1>Project events</h1>
+            <h1 className="text-lg font-thin">{projectName} events</h1>
           </div>
+          <EventsFilter filter={filter} setFilter={setFilter} />
+
           <AddEventToProject
             projectId={projectId}
             events={events}
@@ -218,7 +232,7 @@ export function ProjectEventsView({
         </div>
         <div
           ref={parentRef}
-          className="h-full overflow-y-auto scrollbar scrollbar-track-background scrollbar-thumb-primary"
+          className="h-full overflow-y-auto pl-4 scrollbar scrollbar-track-background scrollbar-thumb-primary"
         >
           <main
             style={{
@@ -227,7 +241,7 @@ export function ProjectEventsView({
             className="relative mx-auto w-11/12"
           >
             {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-              const event = events.at(virtualItem.index)!;
+              const event = filteredEvents.at(virtualItem.index)!;
               return (
                 <div
                   key={virtualItem.key}
@@ -241,13 +255,6 @@ export function ProjectEventsView({
                     <div className="h-12 w-12 rounded-full text-4xl">
                       {categoryEmotes[event.category].emoji}
                     </div>
-                    {/* <Image
-                      src={event.author.avatarUrl}
-                      alt="avatar"
-                      width={48}
-                      height={48}
-                      className="h-12 w-12 rounded-full"
-                    /> */}
                     <div className="w-full">
                       <div className="flex w-full items-center gap-2">
                         <h1>{event.author.username}</h1>

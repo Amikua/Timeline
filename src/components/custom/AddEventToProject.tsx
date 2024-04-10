@@ -46,11 +46,11 @@ export function AddEventToProject({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="outline"
+          variant="default"
           disabled={!isActive}
-          className="my-auto rounded-lg border-2 border-border py-6 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-12 h-12 z-10 absolute text-4xl font-thin bottom-6 right-6 bg-primary text-foreground rounded-full disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Add event
+          +
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[425px] border-border lg:max-w-[600px]">

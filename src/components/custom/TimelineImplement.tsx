@@ -1,13 +1,18 @@
 import React, { useEffect, useRef } from "react";
 import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
-import { getProjectEvents } from "./actions";
+import { getAllProjectEventsWithFilter, getProjectEvents } from "./actions";
 import Link from "next/link";
+import { type Category } from "@prisma/client";
 
 function getScrollToIndex(events: EventAndAuthor[], date: string) {
-  const index = events.findIndex(event => {
+  const index = events.findIndex((event) => {
     const [day, month, year] = date.split("-").map(Number);
     if (!day || !month || !year) return null;
-    return event.happendAt.getDate() === day && event.happendAt.getMonth() + 1 === month && event.happendAt.getFullYear() === year;
+    return (
+      event.happendAt.getDate() === day &&
+      event.happendAt.getMonth() + 1 === month &&
+      event.happendAt.getFullYear() === year
+    );
   });
   return index;
 }
@@ -46,6 +51,7 @@ const monthNames = [
 export function InfiniteScrollHorizontal({
   events,
   setEvents,
+  filter,
   eventsGroupByDay,
   eventsGroupByDayKeys,
   currentDate,
@@ -60,6 +66,7 @@ export function InfiniteScrollHorizontal({
 }: {
   events: EventAndAuthor[];
   setEvents: (events: EventAndAuthor[]) => void;
+  filter: Category | "";
   eventsGroupByDay: Record<string, EventAndAuthor[]>;
   eventsGroupByDayKeys: string[];
   currentDate: string;
@@ -82,9 +89,9 @@ export function InfiniteScrollHorizontal({
     if (currentDateRef.current) {
       // The behavior and block options ensure smooth center alignment
       currentDateRef.current.scrollIntoView({
-        behavior: 'auto',
-        block: 'center',
-        inline: 'center'
+        behavior: "auto",
+        block: "center",
+        inline: "center",
       });
     }
   }, [currentDate, eventsGroupByDay, currentDateRef]); // Depend on currentDate and eventsGroupByDay
@@ -94,10 +101,13 @@ export function InfiniteScrollHorizontal({
       (entries) => {
         if (entries[0]?.isIntersecting && !isFetchingNextPage && hasMore) {
           setIsFetchingNextPage(true);
-          getProjectEvents({
-            projectId,
-            offset: events.length,
-          })
+          (filter
+            ? getAllProjectEventsWithFilter({ projectId, filter })
+            : getProjectEvents({
+                projectId,
+                offset: events.length,
+              })
+          )
             .then((response) => {
               const newEvents = response.data!.events!;
               setHasMore(response.data!.hasMore!);
@@ -129,7 +139,7 @@ export function InfiniteScrollHorizontal({
         observer.disconnect();
       }
     };
-  }, [events, projectId, listContainerRef.current]);
+  }, [events, projectId, filter, listContainerRef.current]);
 
   // Scroll to the right on mount
   useEffect(() => {
@@ -154,25 +164,37 @@ export function InfiniteScrollHorizontal({
           let nextDateObj = undefined;
 
           if (index !== 0) {
-            const [prevDay, prevMonth, prevYear] = eventsGroupByDayKeys[index - 1]!.split("-").map(Number);
-            const previousDateObj = new Date(prevYear!, prevMonth! - 1, prevDay);
-            differenceInDays = Math.floor((previousDateObj.getTime() - currentDateObj.getTime()) / (1000 * 60 * 60 * 24));
+            const [prevDay, prevMonth, prevYear] =
+              eventsGroupByDayKeys[index - 1]!.split("-").map(Number);
+            const previousDateObj = new Date(
+              prevYear!,
+              prevMonth! - 1,
+              prevDay,
+            );
+            differenceInDays = Math.floor(
+              (previousDateObj.getTime() - currentDateObj.getTime()) /
+                (1000 * 60 * 60 * 24),
+            );
           }
 
           if (index !== eventsGroupByDayKeys.length - 1) {
-            const [nextDay, nextMonth, nextYear] = eventsGroupByDayKeys[index + 1]!.split("-").map(Number);
+            const [nextDay, nextMonth, nextYear] =
+              eventsGroupByDayKeys[index + 1]!.split("-").map(Number);
             nextDateObj = new Date(nextYear!, nextMonth! - 1, nextDay);
             // For prev date 08-02-2021 and current date 29-01-2021, the difference in months should be 1
             // For prev date 08-02-2022 and current date 08-02-2021, the difference in months should be 12
             // absoluteDifferenceInMonths = Math.abs(previousDateObj.getMonth() - currentDateObj.getMonth() + (12 * (previousDateObj.getFullYear() - currentDateObj.getFullYear())));
-            absoluteDifferenceInMonths = Math.abs(nextDateObj.getMonth() - currentDateObj.getMonth() + (12 * (nextDateObj.getFullYear() - currentDateObj.getFullYear())));
+            absoluteDifferenceInMonths = Math.abs(
+              nextDateObj.getMonth() -
+                currentDateObj.getMonth() +
+                12 * (nextDateObj.getFullYear() - currentDateObj.getFullYear()),
+            );
           }
 
           return (
             <div
               className="relative flex w-max flex-col items-center"
               style={{ marginRight: `${2 + differenceInDays}rem` }}
-
               ref={(el) => {
                 if (currentDate === date) {
                   // @ts-expect-error Hack to make multiple refs work
@@ -190,7 +212,7 @@ export function InfiniteScrollHorizontal({
               }}
               key={date}
             >
-              <span className="w-max text-xs pb-1">
+              <span className="w-max pb-1 text-xs">
                 {date
                   .split("-")
                   .map((it) => it.padStart(2, "0"))
@@ -210,9 +232,9 @@ export function InfiniteScrollHorizontal({
               <div
                 className={`h-full w-1 ${currentDate === date ? "bg-primary" : "bg-secondary"}`}
               ></div>
-              {(absoluteDifferenceInMonths > 0 && nextDateObj) && (
+              {absoluteDifferenceInMonths > 0 && nextDateObj && (
                 <h3
-                  className={`absolute -left-2/3 top-0 text-center font-thin h-full w-8 [writing-mode:vertical-lr]`}
+                  className={`absolute -left-2/3 top-0 h-full w-8 text-center font-thin [writing-mode:vertical-lr]`}
                 >
                   {`${monthNames[currentDateObj.getMonth()]} ${currentDateObj.getFullYear()}`}
                 </h3>

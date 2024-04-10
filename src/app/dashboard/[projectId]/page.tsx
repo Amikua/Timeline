@@ -67,7 +67,7 @@ export default async function Page({
     }),
     db.project.findFirst({
       where: { id: projectId },
-      select: { isActive: true },
+      select: { isActive: true, name: true },
     }),
     new Promise((resolve) => setTimeout(resolve, 300)),
   ]);
@@ -80,6 +80,7 @@ export default async function Page({
     <>
       <SettingsLink projectId={projectId} />
       <Timeline
+        projectName={project?.name ?? "Unknown project"}
         projectId={projectId}
         events={events}
         userId={user.id}
