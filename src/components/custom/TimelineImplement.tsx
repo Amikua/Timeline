@@ -1,16 +1,21 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
 import { getProjectEvents } from "./actions";
 import Link from "next/link";
 
 function getScrollToIndex(events: EventAndAuthor[], date: string) {
-  const index = events.findIndex(event => {
+  const index = events.findIndex((event) => {
     const [day, month, year] = date.split("-").map(Number);
     if (!day || !month || !year) return null;
-    return event.happendAt.getDate() === day && event.happendAt.getMonth() + 1 === month && event.happendAt.getFullYear() === year;
+    return (
+      event.happendAt.getDate() === day &&
+      event.happendAt.getMonth() + 1 === month &&
+      event.happendAt.getFullYear() === year
+    );
   });
   return index;
 }
+
 function useHorizontalScroll() {
   const elRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -28,6 +33,20 @@ function useHorizontalScroll() {
   return elRef;
 }
 
+function getCurrentSeason(month: number) {
+  if (month >= 0 && month <= 1) {
+    return "winter";
+  } else if (month >= 2 && month <= 4) {
+    return "spring";
+  } else if (month >= 5 && month <= 7) {
+    return "summer";
+  } else if (month >= 8 && month <= 10) {
+    return "fall";
+  } else {
+    return "winter";
+  }
+}
+
 const monthNames = [
   "January",
   "February",
@@ -42,6 +61,66 @@ const monthNames = [
   "November",
   "December",
 ];
+
+const colorMap = {
+  winter: "hsl(240, 70%, 4%)",
+  spring: "hsl(120, 70%, 4%)",
+  summer: "hsl(3, 70%, 4%)",
+  fall: "hsl(26, 70%, 4%)",
+};
+
+
+const seasons = ["winter", "spring", "summer", "fall"] as const;
+type Season = (typeof seasons)[number];
+
+// Function to generate the gradient string based on the season distribution
+const generateGradient = (
+  from: Season,
+  to: Season,
+  fullYear: boolean,
+  shouldRenderSeasons: boolean,
+) => {
+  if (!shouldRenderSeasons) {
+    return {};
+  }
+  // return "linear-gradient(to left, red 0%, blue 50%, red 100%)"
+  // linear-gradient(to left, #f09433 50%, 50%, #4ca1af 50%, 50%)
+  const fromIndex = seasons.indexOf(from);
+  const toIndex = seasons.indexOf(to);
+
+  // const length = fullYear ? 4 : Math.abs(toIndex - fromIndex) + 1;
+  const diff = Math.abs(toIndex - fromIndex);
+  const length = fullYear ? 4 : Math.min(diff, 4 - diff) + 1;
+  if (length === 1) {
+    const color = colorMap[from];
+    return {
+      background: color,
+    };
+  }
+
+  const cycle = Array.from({ length }, (_, i) =>
+    seasons.at((fromIndex - i) % seasons.length),
+  );
+
+  const seasonDistribution = cycle.map((season, i) => {
+    const width = (100 / length).toFixed(2);
+    return { season, width };
+  });
+
+  let gradient = "linear-gradient(to left";
+
+  seasonDistribution.forEach(
+    ({ season, width }, i) =>
+      // `linear-gradient(to right, ${colorMap[season!]}) ${width}%`,
+      (gradient += `, ${colorMap[season!]} ${Number(width) * i}%`),
+  );
+
+  gradient += `, ${colorMap[to]} 100%)`;
+
+  return {
+    backgroundImage: gradient,
+  };
+};
 
 export function InfiniteScrollHorizontal({
   events,
@@ -75,6 +154,7 @@ export function InfiniteScrollHorizontal({
   const lastItemRef = useRef<HTMLDivElement>(null); // Ref for the item to observe
   const listContainerRef = useHorizontalScroll(); // Ref for the scrolling container
   const currentDateRef = useRef<HTMLDivElement>(null); // Ref for the current date element
+  const [shouldRenderSeasons, setShouldRenderSeasons] = useState(false);
 
   // Existing useEffects and other code remains the same
 
@@ -82,9 +162,9 @@ export function InfiniteScrollHorizontal({
     if (currentDateRef.current) {
       // The behavior and block options ensure smooth center alignment
       currentDateRef.current.scrollIntoView({
-        behavior: 'auto',
-        block: 'center',
-        inline: 'center'
+        behavior: "auto",
+        block: "center",
+        inline: "center",
       });
     }
   }, [currentDate, eventsGroupByDay, currentDateRef]); // Depend on currentDate and eventsGroupByDay
@@ -135,6 +215,7 @@ export function InfiniteScrollHorizontal({
   useEffect(() => {
     if (listContainerRef.current) {
       const { scrollWidth, clientWidth } = listContainerRef.current;
+      setShouldRenderSeasons(clientWidth < scrollWidth);
       listContainerRef.current.scrollLeft = scrollWidth - clientWidth;
     }
   }, []);
@@ -142,7 +223,7 @@ export function InfiniteScrollHorizontal({
   return (
     <div
       ref={listContainerRef}
-      className="relative h-36 min-h-36 shrink-0 overflow-auto px-8 scrollbar scrollbar scrollbar-track-background scrollbar-thumb-background"
+      className="customShadow relative z-10 h-40 min-h-40 shrink-0 overflow-auto rounded-lg scrollbar scrollbar-track-background scrollbar-thumb-background"
     >
       <div className="relative flex h-full w-fit min-w-full flex-row-reverse border-b-2 border-secondary">
         {Object.entries(eventsGroupByDay).map(([date, data], index) => {
@@ -151,28 +232,60 @@ export function InfiniteScrollHorizontal({
           const currentDateObj = new Date(year!, month! - 1, day);
           let differenceInDays = 0;
           let absoluteDifferenceInMonths = 0;
+          let absoluteDifferenceBetweenCurrentAndPreviousInMonths = 0;
+          const currentSeason = getCurrentSeason(currentDateObj.getMonth());
+          let previousSeason = currentSeason;
           let nextDateObj = undefined;
 
           if (index !== 0) {
-            const [prevDay, prevMonth, prevYear] = eventsGroupByDayKeys[index - 1]!.split("-").map(Number);
-            const previousDateObj = new Date(prevYear!, prevMonth! - 1, prevDay);
-            differenceInDays = Math.floor((previousDateObj.getTime() - currentDateObj.getTime()) / (1000 * 60 * 60 * 24));
+            const [prevDay, prevMonth, prevYear] =
+              eventsGroupByDayKeys[index - 1]!.split("-").map(Number);
+            const previousDateObj = new Date(
+              prevYear!,
+              prevMonth! - 1,
+              prevDay,
+            );
+            previousSeason = getCurrentSeason(previousDateObj.getMonth());
+            differenceInDays = Math.floor(
+              (previousDateObj.getTime() - currentDateObj.getTime()) /
+              (1000 * 60 * 60 * 24),
+            );
+            absoluteDifferenceBetweenCurrentAndPreviousInMonths = Math.abs(
+              previousDateObj.getMonth() -
+              currentDateObj.getMonth() +
+              12 *
+              (previousDateObj.getFullYear() -
+                currentDateObj.getFullYear()),
+            );
           }
 
           if (index !== eventsGroupByDayKeys.length - 1) {
-            const [nextDay, nextMonth, nextYear] = eventsGroupByDayKeys[index + 1]!.split("-").map(Number);
+            const [nextDay, nextMonth, nextYear] =
+              eventsGroupByDayKeys[index + 1]!.split("-").map(Number);
             nextDateObj = new Date(nextYear!, nextMonth! - 1, nextDay);
             // For prev date 08-02-2021 and current date 29-01-2021, the difference in months should be 1
             // For prev date 08-02-2022 and current date 08-02-2021, the difference in months should be 12
             // absoluteDifferenceInMonths = Math.abs(previousDateObj.getMonth() - currentDateObj.getMonth() + (12 * (previousDateObj.getFullYear() - currentDateObj.getFullYear())));
-            absoluteDifferenceInMonths = Math.abs(nextDateObj.getMonth() - currentDateObj.getMonth() + (12 * (nextDateObj.getFullYear() - currentDateObj.getFullYear())));
+            absoluteDifferenceInMonths = Math.abs(
+              nextDateObj.getMonth() -
+              currentDateObj.getMonth() +
+              12 * (nextDateObj.getFullYear() - currentDateObj.getFullYear()),
+            );
           }
 
           return (
             <div
               className="relative flex w-max flex-col items-center"
-              style={{ marginRight: `${2 + differenceInDays}rem` }}
-
+              style={{
+                paddingRight: `${2 + differenceInDays}rem`,
+                paddingLeft: eventsGroupByDayKeys.length - 1 === index ? "2rem" : "0",
+                ...generateGradient(
+                  previousSeason as Season,
+                  currentSeason,
+                  absoluteDifferenceBetweenCurrentAndPreviousInMonths >= 12,
+                  shouldRenderSeasons
+                ),
+              }}
               ref={(el) => {
                 if (currentDate === date) {
                   // @ts-expect-error Hack to make multiple refs work
@@ -190,29 +303,28 @@ export function InfiniteScrollHorizontal({
               }}
               key={date}
             >
-              <span className="w-max text-xs pb-1">
+              <span className="w-max pb-1 pt-3 text-xs">
                 {date
                   .split("-")
                   .map((it) => it.padStart(2, "0"))
                   .join("-")}
               </span>
-              <Link
+              <button
                 onClick={() => {
                   setWithoutAutoScroll(true);
                   setCurrentDate(date);
                   setScrollToIndex(getScrollToIndex(events, date));
                 }}
-                href={`/dashboard/${projectId}?date=${date}`}
                 className={`z-10 h-8 min-h-8 w-8 min-w-8 rounded-3xl py-1 text-center shadow-lg ${currentDate === date ? "bg-primary shadow-primary" : "bg-secondary shadow-secondary"}`}
               >
                 {data.length > 9 ? "9+" : data.length}
-              </Link>
+              </button>
               <div
                 className={`h-full w-1 ${currentDate === date ? "bg-primary" : "bg-secondary"}`}
               ></div>
-              {(absoluteDifferenceInMonths > 0 && nextDateObj) && (
+              {absoluteDifferenceInMonths > 0 && nextDateObj && (
                 <h3
-                  className={`absolute -left-2/3 top-0 text-center font-thin h-full w-8 [writing-mode:vertical-lr]`}
+                  className={`absolute -left-12 top-0 z-10 h-full w-8 text-center font-thin [writing-mode:vertical-lr]`}
                 >
                   {`${monthNames[currentDateObj.getMonth()]} ${currentDateObj.getFullYear()}`}
                 </h3>

@@ -204,7 +204,7 @@ export function ProjectEventsView({
 
   return (
     <div className="relative flex max-h-[90%] flex-1 items-center justify-center py-16">
-      <div className="w flex h-full max-h-full w-4/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary xl:w-3/5">
+      <div className="w flex h-full max-h-full w-4/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary xl:w-3/5 bg-background">
         <div className="flex justify-between break-words rounded-xl px-8">
           <div className="my-auto">
             <h1>Project events</h1>

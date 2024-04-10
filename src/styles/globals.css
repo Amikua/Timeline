@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-
   :root,
   .dark {
     --background: 240 10% 3.9%;
@@ -31,6 +30,9 @@
   }
 }
 
-
 @layer components {
+}
+
+.customShadow {
+  box-shadow: 0 0 4rem hsl(var(--secondary));
 }

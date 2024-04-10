@@ -20,7 +20,9 @@ export default async function RootLayout({
   return (
     <div className="relative w-full max-w-full h-full flex">
       <Sidebar user={user} />
-      <main className="relative min-h-full max-h-full min-w-0  flex-1 p-2 rounded-sm overflow-hidden">
+      <main className="relative min-h-full max-h-full min-w-0  flex-1 p-2 rounded-sm overflow-hidden"
+        style={{ backgroundImage: "url('https://wallpapercave.com/wp/wp9341413.jpg')", backgroundSize: "cover"}} 
+      >
         {children}
       </main>
     </div>
