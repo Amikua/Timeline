@@ -1,0 +1,28 @@
+name: Add event to project on push to main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  make-api-call:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get commit message
+        id: commit-message
+        run: echo "COMMIT_MESSAGE=$(git log --format=%B -n 1 ${{ github.sha }} | tr -d '\r\n')" >> $GITHUB_ENV
+
+      - name: Call API Endpoint
+        env:
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          USERNAME: ${{ secrets.USERNAME }}
+          API_KEY: ${{ secrets.API_KEY }}
+          COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
+        run: |
+          curl -X POST "https://timeline-amikua.vercel.app/api/events" \
+            -H "Content-Type: application/json" \
+            -d '{"projectId": "${{ env.PROJECT_ID }}", "content": "${{ env.COMMIT_MESSAGE }}", "category": "ROCKET", "username": "${{ env.USERNAME }}", "apiKey": "${{ env.API_KEY }}"}'
