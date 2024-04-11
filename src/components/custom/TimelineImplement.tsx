@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
 import { getAllProjectEventsWithFilter, getProjectEvents } from "./actions";
 import Link from "next/link";
 import { type Category } from "@prisma/client";
+import { categoryEmotes } from "./AddCategoryToPost";
 
 function getScrollToIndex(events: EventAndAuthor[], date: string) {
   const index = events.findIndex((event) => {
@@ -48,6 +49,25 @@ const monthNames = [
   "December",
 ];
 
+const getSeason = (month: number) => {
+  if (month >= 2 && month <= 4) {
+    return "spring";
+  } else if (month >= 5 && month <= 7) {
+    return "summer";
+  } else if (month >= 8 && month <= 10) {
+    return "fall";
+  } else {
+    return "winter";
+  }
+};
+
+const seasonToColor = {
+  winter: "hsl(210, 30%, 40%)",
+  spring: "hsl(120, 40%, 75%)",
+  summer: "hsl(10, 90%, 55%)",
+  fall: "hsl(30, 50%, 40%)",
+};
+
 export function InfiniteScrollHorizontal({
   events,
   setEvents,
@@ -82,8 +102,9 @@ export function InfiniteScrollHorizontal({
   const lastItemRef = useRef<HTMLDivElement>(null); // Ref for the item to observe
   const listContainerRef = useHorizontalScroll(); // Ref for the scrolling container
   const currentDateRef = useRef<HTMLDivElement>(null); // Ref for the current date element
-
-  // Existing useEffects and other code remains the same
+  const [newScrollPosition, setNewScrollPosition] = useState<
+    number | undefined
+  >();
 
   useEffect(() => {
     if (currentDateRef.current) {
@@ -94,7 +115,18 @@ export function InfiniteScrollHorizontal({
         inline: "center",
       });
     }
-  }, [currentDate, eventsGroupByDay, currentDateRef]); // Depend on currentDate and eventsGroupByDay
+  }, [currentDate, currentDateRef]);
+
+  useLayoutEffect(() => {
+    if (listContainerRef.current && newScrollPosition) {
+      // listContainerRef.current.scrollLeft = newScrollPosition;
+      const it = listContainerRef.current;
+      console.log(it.scrollWidth, it.scrollLeft, newScrollPosition);
+      listContainerRef.current.scrollLeft =
+        listContainerRef.current.scrollWidth - newScrollPosition;
+      setNewScrollPosition(undefined);
+    }
+  }, [newScrollPosition, setNewScrollPosition, listContainerRef]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -122,8 +154,8 @@ export function InfiniteScrollHorizontal({
             })
             .finally(() => {
               setIsFetchingNextPage(false);
-              const width = listContainerRef.current!.scrollWidth;
-              listContainerRef.current!.scrollLeft = width - width * 0.85;
+              const it = listContainerRef.current!;
+              setNewScrollPosition(it.scrollWidth - it.scrollLeft);
             });
         }
       },
@@ -152,7 +184,7 @@ export function InfiniteScrollHorizontal({
   return (
     <div
       ref={listContainerRef}
-      className="relative h-36 min-h-36 shrink-0 overflow-auto px-8 scrollbar scrollbar scrollbar-track-background scrollbar-thumb-background"
+      className="relative h-36 min-h-36 shrink-0 overflow-auto px-8 scrollbar scrollbar-track-background scrollbar-thumb-background"
     >
       <div className="relative flex h-full w-fit min-w-full flex-row-reverse border-b-2 border-secondary">
         {Object.entries(eventsGroupByDay).map(([date, data], index) => {
@@ -191,6 +223,23 @@ export function InfiniteScrollHorizontal({
             );
           }
 
+          const mostOftenCategory = data.reduce(
+            (acc, curr) => {
+              if (!acc[curr.category]) {
+                acc[curr.category] = 0;
+              }
+              acc[curr.category]++;
+              return acc;
+            },
+            {} as Record<Category, number>,
+          );
+
+          const mostOftenCategories: Category[] = Object.entries(
+            mostOftenCategory,
+          )
+            .sort((a, b) => b[1] - a[1])
+            .map(([category]) => category as Category);
+
           return (
             <div
               className="relative flex w-max flex-col items-center"
@@ -225,12 +274,38 @@ export function InfiniteScrollHorizontal({
                   setScrollToIndex(getScrollToIndex(events, date));
                 }}
                 href={`/dashboard/${projectId}?date=${date}`}
-                className={`z-10 h-8 min-h-8 w-8 min-w-8 rounded-3xl py-1 text-center shadow-lg ${currentDate === date ? "bg-primary shadow-primary" : "bg-secondary shadow-secondary"}`}
+                className={`z-10 flex h-8 min-h-8 w-8 min-w-8 flex-col gap-1 rounded-3xl py-1 text-center shadow-lg`}
+                style={{
+                  backgroundColor:
+                    currentDate === date
+                      ? "hsl(var(--primary))"
+                      : seasonToColor[getSeason(currentDateObj.getMonth())],
+                  boxShadow:
+                    currentDate === date
+                      ? "0px 0px 10px 5px hsl(var(--primary))"
+                      : `0px 0px 10px 5px ${seasonToColor[getSeason(currentDateObj.getMonth())]}`,
+                }}
               >
-                {data.length > 9 ? "9+" : data.length}
+                {categoryEmotes[mostOftenCategories.at(0)!].emoji}
+                {mostOftenCategories.length > 2 ? (
+                  <span className="text-sm">
+                    {categoryEmotes[mostOftenCategories.at(1)!].emoji}
+                  </span>
+                ) : null}
+                {mostOftenCategories.length > 3 ? (
+                  <span className="text-xs">
+                    {categoryEmotes[mostOftenCategories.at(2)!].emoji}
+                  </span>
+                ) : null}
               </Link>
               <div
-                className={`h-full w-1 ${currentDate === date ? "bg-primary" : "bg-secondary"}`}
+                className={`h-full w-1`}
+                style={{
+                  backgroundColor:
+                    currentDate === date
+                      ? "hsl(var(--primary))"
+                      : seasonToColor[getSeason(currentDateObj.getMonth())],
+                }}
               ></div>
               {absoluteDifferenceInMonths > 0 && nextDateObj && (
                 <h3
