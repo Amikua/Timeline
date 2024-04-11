@@ -92,7 +92,7 @@ export default async function Page({
     }),
     db.project.findFirst({
       where: { id: projectId },
-      select: { isActive: true, apiKey: true},
+      select: { isActive: true, apiKey: true },
     }),
   ]);
 
@@ -103,7 +103,7 @@ export default async function Page({
   const disabledRemoveButton = allUsers.length < 2;
 
   return (
-    <div className="max-h-full min-h-full min-w-full max-w-full rounded-2xl shadow-lg shadow-secondary">
+    <div className="max-h-full min-h-full min-w-full max-w-full rounded-2xl shadow-lg shadow-secondary overflow-y-auto scrollbar scrollbar-track-primary-foreground scrollbar-thumb-primary">
       <GoBackToProject projectId={projectId} />
       <h1 className="mx-auto w-11/12 border-b-2 border-secondary px-16 py-10 text-center text-4xl font-bold">
         Project Settings
