@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: Project Events API
+  description: API to log events related to projects
+  version: "1.0.0"
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/pauch.aleksander/Timeline-Amikua/1.0.0
+  - url: https://timeline-amikua.vercel.app
+paths:
+  /api/events:
+    post:
+      summary: Add a new event to a project
+      description: Adds a new event to a project based on the provided event details and project identification.
+      operationId: addProjectEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectId:
+                  type: string
+                  description: The unique identifier for the project.
+                content:
+                  type: string
+                  description: The content or description of the event.
+                category:
+                  type: string
+                  enum: [ISSUE, BUG, FEATURES, WIP, ZAP, TADA, AMBULANCE, ROCKET, CHECKMARK, LOCK, PENCIL, REWIND, BULB, SPEECH, PHONE, RUBBISH]
+                  description: The category of the event.
+                username:
+                  type: string
+                  description: The username of the individual logging the event.
+                apiKey:
+                  type: string
+                  description: The API key used for authorization.
+                happendAt:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: The date and time when the event happened, in ISO format. Optional.
+              required:
+                - projectId
+                - content
+                - category
+                - username
+                - apiKey
+      responses:
+        '201':
+          description: Event created successfully.
+        '400':
+          description: Bad Request. The request could not be understood by the server due to malformed syntax.
+        '401':
+          description: Unauthorized. The request requires user authentication or the API key was not provided or incorrect.
+        '403':
+          description: Forbidden. The server understood the request, but is refusing to fulfill it.
+        '404':
+          description: Project Not Found. The requested project ID does not exist.
+        '500':
+          description: Internal Server Error. A generic error message, given when an unexpected condition was encountered.
