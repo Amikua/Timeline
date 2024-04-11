@@ -9,7 +9,7 @@ import { RemoveUserFromProject } from "~/components/custom/RemoveUserFromProject
 import { DeleteProject } from "~/components/custom/DeleteProject";
 import { ChangeProjectStatus } from "~/components/custom/ChangeProjectStatus";
 import { env } from "~/env";
-import { DisplayProjectApiKey } from "~/components/custom/DisplayProjectApiKey";
+import { DisplayApiKey } from "~/components/custom/DisplayProjectApiKey";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -103,7 +103,7 @@ export default async function Page({
   const disabledRemoveButton = allUsers.length < 2;
 
   return (
-    <div className="max-h-full min-h-full min-w-full max-w-full rounded-2xl shadow-lg shadow-secondary overflow-y-auto scrollbar scrollbar-track-primary-foreground scrollbar-thumb-primary">
+    <div className="max-h-full min-h-full min-w-full max-w-full overflow-y-auto rounded-2xl shadow-lg shadow-secondary scrollbar scrollbar-track-primary-foreground scrollbar-thumb-primary">
       <GoBackToProject projectId={projectId} />
       <h1 className="mx-auto w-11/12 border-b-2 border-secondary px-16 py-10 text-center text-4xl font-bold">
         Project Settings
@@ -139,11 +139,14 @@ export default async function Page({
               projectId={projectId}
             ></DeleteProject>
           </div>
-          <DisplayProjectApiKey apiKey={project.apiKey} />
+          <DisplayApiKey apiKey={project.apiKey} projectId={projectId} />
           {projectEmail && (
             <div className="flex flex-col gap-4">
               <h1 className="text-2xl font-bold">Project Email</h1>
-              <Link href={`mailto:${projectEmail}`} className="text-lg font-thin text-link underline">
+              <Link
+                href={`mailto:${projectEmail}`}
+                className="text-lg font-thin text-link underline"
+              >
                 {projectEmail}
               </Link>
             </div>

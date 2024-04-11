@@ -22,7 +22,10 @@ export function DeleteProject({
 }) {
   return (
     <AlertDialog>
-      <AlertDialogTrigger className="h-12 w-32 rounded-md bg-destructive px-4 hover:brightness-75 disabled:brightness-50">
+      <AlertDialogTrigger
+        className="h-12 w-32 rounded-md border border-destructive px-4 transition-colors duration-200
+        hover:bg-destructive hover:brightness-75 disabled:brightness-50"
+      >
         Delete
       </AlertDialogTrigger>
       <AlertDialogContent>

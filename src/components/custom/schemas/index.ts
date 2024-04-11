@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { Category } from "@prisma/client";
 
+export const regenerateProjectApiKeySchema = z.object({
+  projectId: z.string().min(1),
+});
+
 export const addProjectSchema = z.object({
   name: z.string().min(1),
 });

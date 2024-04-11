@@ -27,7 +27,8 @@ export function RemoveUserFromProject({
   return (
     <AlertDialog>
       <AlertDialogTrigger
-        className="w-24 rounded-md bg-destructive px-4 hover:brightness-75 disabled:brightness-50"
+        className="w-24 rounded-md border border-destructive px-4 transition-colors duration-200  
+        hover:bg-destructive hover:brightness-75 disabled:brightness-50 disabled:cursor-not-allowed"
         disabled={disabled}
       >
         {text}

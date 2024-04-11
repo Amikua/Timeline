@@ -4,6 +4,7 @@ import { revalidatePath, unstable_cache } from "next/cache";
 import { db } from "~/server/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { v4 as uuidv4 } from 'uuid';
 import { action } from "~/lib/safe-action";
 import { readEmails } from "~/lib/mail";
 import { env } from "~/env";
@@ -20,6 +21,7 @@ import {
   addEventToProjectSchema,
   addProjectSchema,
   getAllEventsWithFilterSchema,
+  regenerateProjectApiKeySchema,
 } from "../schemas";
 
 export const checkForEventFromEmailCached = unstable_cache(
@@ -44,6 +46,32 @@ export async function checkForEventFromEmail() {
   }
   return {};
 }
+
+export const regenerateProjectApiKey = action(
+  regenerateProjectApiKeySchema,
+  async ({ projectId }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+    const project = await db.project.findFirst({
+      where: { id: projectId },
+      select: { apiKey: true },
+    });
+    if (!project) {
+      return {
+        error: "Project not found",
+      };
+    }
+    await db.project.update({
+      where: { id: projectId },
+      data: { apiKey: uuidv4() },
+    });
+    revalidatePath(`/dashboard/${projectId}/settings`);
+  },
+);
 
 export const getAllEvents = action(
   getAllEventsSchema,

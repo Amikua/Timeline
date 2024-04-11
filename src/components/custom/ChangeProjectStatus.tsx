@@ -43,15 +43,23 @@ export function ChangeProjectStatus({
     }
   }, [didFinish]);
 
-
   return (
     <>
       <div className="absolute left-0 top-0">
-        {didFinish && <Confetti width={width} numberOfPieces={1000} tweenDuration={2500} recycle={false} height={height} />}
+        {didFinish && (
+          <Confetti
+            width={width}
+            numberOfPieces={1000}
+            tweenDuration={2500}
+            recycle={false}
+            height={height}
+          />
+        )}
       </div>
       <AlertDialog>
         <AlertDialogTrigger
-          className={`${isActive ? "bg-destructive" : "bg-green-700"} h-12 w-32 rounded-md bg-accent px-4 hover:brightness-75 disabled:brightness-50`}
+          className={`${isActive ? "border-destructive hover:bg-destructive" : "border-green-700 hover:bg-green-700"} 
+          h-12 w-32 rounded-md border transition-colors duration-200 px-4 hover:brightness-75 disabled:brightness-50`}
         >
           {children}
         </AlertDialogTrigger>
@@ -70,7 +78,6 @@ export function ChangeProjectStatus({
                   isActive: !isActive,
                 });
                 setDidFinish(isActive);
-
               }}
             >
               Yes
