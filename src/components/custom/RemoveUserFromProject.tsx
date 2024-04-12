@@ -24,6 +24,7 @@ export function RemoveUserFromProject({
   disabled: boolean;
   text: string;
 }) {
+  console.log("hello");
   return (
     <AlertDialog>
       <AlertDialogTrigger
