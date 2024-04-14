@@ -63,7 +63,7 @@ const getSeason = (month: number) => {
 
 const seasonToColor = {
   winter: "hsl(210, 30%, 40%)",
-  spring: "hsl(120, 40%, 75%)",
+  spring: "hsl(120deg 26.63% 45.66%)",
   summer: "hsl(10, 90%, 55%)",
   fall: "hsl(30, 50%, 40%)",
 };
@@ -287,17 +287,41 @@ export function InfiniteScrollHorizontal({
                 }}
               >
                 {categoryEmotes[mostOftenCategories.at(0)!].emoji}
-                {mostOftenCategories.length > 2 ? (
-                  <span className="text-sm">
-                    {categoryEmotes[mostOftenCategories.at(1)!].emoji}
-                  </span>
-                ) : null}
-                {mostOftenCategories.length > 3 ? (
-                  <span className="text-xs">
-                    {categoryEmotes[mostOftenCategories.at(2)!].emoji}
-                  </span>
-                ) : null}
               </Link>
+              {mostOftenCategories.length > 2 ? (
+                <span
+                  className="h-6 w-6 rounded-full p-1 pb-2 text-center text-xs"
+                  style={{
+                    backgroundColor:
+                      currentDate === date
+                        ? "hsl(var(--primary))"
+                        : seasonToColor[getSeason(currentDateObj.getMonth())],
+                    boxShadow:
+                      currentDate === date
+                        ? "0px 0px 10px 5px hsl(var(--primary))"
+                        : `0px 0px 10px 5px ${seasonToColor[getSeason(currentDateObj.getMonth())]}`,
+                  }}
+                >
+                  {categoryEmotes[mostOftenCategories.at(1)!].emoji}
+                </span>
+              ) : null}
+              {mostOftenCategories.length > 3 ? (
+                <span
+                  className="h-5 w-5 p-1 rounded-full text-center text-2xs"
+                  style={{
+                    backgroundColor:
+                      currentDate === date
+                        ? "hsl(var(--primary))"
+                        : seasonToColor[getSeason(currentDateObj.getMonth())],
+                    boxShadow:
+                      currentDate === date
+                        ? "0px 0px 10px 5px hsl(var(--primary))"
+                        : `0px 0px 10px 5px ${seasonToColor[getSeason(currentDateObj.getMonth())]}`,
+                  }}
+                >
+                  {categoryEmotes[mostOftenCategories.at(2)!].emoji}
+                </span>
+              ) : null}
               <div
                 className={`h-full w-1`}
                 style={{
