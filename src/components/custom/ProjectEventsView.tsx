@@ -216,10 +216,12 @@ export function ProjectEventsView({
 
   return (
     <div className="relative flex max-h-[90%] flex-1 items-center justify-center py-16">
-      <div className="relative flex h-full max-h-full w-4/5 max-w-[34rem] flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary xl:w-3/5">
-        <div className="flex justify-between break-words rounded-xl px-8">
-          <div className="my-auto">
-            <h1 className="text-lg font-thin">{projectName} events</h1>
+      <div className="relative flex h-full max-h-full w-4/5 max-w-[34rem] bg-background flex-col gap-8 rounded-xl border border-secondary p-6 shadow-md shadow-secondary xl:w-3/5">
+        <div className="flex max-w-full justify-between gap-2 break-words rounded-xl pl-8 pr-4">
+          <div className="my-auto overflow-hidden">
+            <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-lg font-thin">
+              {projectName} events
+            </h1>
           </div>
           <EventsFilter filter={filter} setFilter={setFilter} />
 
