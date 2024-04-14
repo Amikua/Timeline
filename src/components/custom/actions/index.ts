@@ -22,6 +22,7 @@ import {
   addProjectSchema,
   getAllEventsWithFilterSchema,
   regenerateProjectApiKeySchema,
+  setProjectBackgroundImageSchema,
 } from "../schemas";
 
 export const checkForEventFromEmailCached = unstable_cache(
@@ -70,6 +71,23 @@ export const regenerateProjectApiKey = action(
       data: { apiKey: uuidv4() },
     });
     revalidatePath(`/dashboard/${projectId}/settings`);
+  },
+);
+
+export const setProjectBackgroundImage = action(
+  setProjectBackgroundImageSchema,
+  async ({ projectId, url }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+    await db.project.update({
+      where: { id: projectId },
+      data: { backgroundImage: url },
+    });
+    revalidatePath(`/dashboard/${projectId}`);
   },
 );
 
@@ -231,7 +249,23 @@ export const deleteProject = action(
     await db.project.delete({
       where: { id: projectId },
     });
+
     revalidatePath(`/dashboard`);
+
+    const latestProject = await db.project.findFirst({
+      orderBy: { createdAt: "desc" },
+      where: {
+        isActive: true,
+        users: {
+          some: {
+            id: user.id,
+          },
+        },
+      }
+    });
+
+    redirect(`/dashboard/${latestProject?.id}`);
+
   },
 );
 

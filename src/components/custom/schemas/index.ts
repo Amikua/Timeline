@@ -9,6 +9,11 @@ export const addProjectSchema = z.object({
   name: z.string().min(1),
 });
 
+export const setProjectBackgroundImageSchema = z.object({
+  projectId: z.string().min(1),
+  url: z.string(),
+});
+
 export const changeProjectStatusSchema = z.object({
   id: z.string().min(1),
   projectId: z.string().min(1),

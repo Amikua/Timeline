@@ -16,6 +16,7 @@ export default async function RootLayout({
   // Check if user is in the project
   const project = await db.project.findFirst({
     select: {
+      backgroundImage: true,
       users: {
         select: {
           id: true,
@@ -32,7 +33,16 @@ export default async function RootLayout({
   }
 
   return (
-    <div className="relative flex h-1 min-h-full max-h-screen; min-w-full max-w-full flex-col justify-between p-16">
+    <div
+      className="max-h-screen; relative flex h-1 min-h-full min-w-full max-w-full flex-col justify-between p-16"
+      style={{
+        backgroundImage: project?.backgroundImage
+          ? `url(${project.backgroundImage})`
+          : "",
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat"
+      }}
+    >
       {children}
     </div>
   );
