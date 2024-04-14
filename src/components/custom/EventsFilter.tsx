@@ -35,7 +35,7 @@ export function EventsFilter({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-48 justify-between"
+          className="min-w-36 w-36 justify-between"
         >
           {filter
             ? `${categoryEmotes[filter].emoji} ${categoryEmotes[filter].label}`
@@ -44,7 +44,7 @@ export function EventsFilter({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className=" max-h-44 w-[280px] overflow-y-auto p-0 scrollbar-none">
+      <PopoverContent className=" max-h-44 w-52 overflow-y-auto p-0 scrollbar-none">
         <Command>
           <CommandInput placeholder="Search category..." />
           <CommandEmpty>No category found.</CommandEmpty>

@@ -9,7 +9,9 @@ import { RemoveUserFromProject } from "~/components/custom/RemoveUserFromProject
 import { DeleteProject } from "~/components/custom/DeleteProject";
 import { ChangeProjectStatus } from "~/components/custom/ChangeProjectStatus";
 import { env } from "~/env";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { DisplayApiKey } from "~/components/custom/DisplayProjectApiKey";
+import { SetProjectBackgroundImage } from "~/components/custom/SetProjectBackgroundImage";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -45,7 +47,7 @@ function DisplayUser({
     <div
       className={`flex justify-between pb-4 ${isCurrentUser && "mb-2 border-b border-muted"}`}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 overflow-hidden">
         <Image
           src={user.avatarUrl}
           alt="Current user avatar"
@@ -55,7 +57,7 @@ function DisplayUser({
         />
         <div>
           <h1>{user.username}</h1>
-          <h2>{user.email}</h2>
+          <h2 className=" text-ellipsis">{user.email}</h2>
         </div>
       </div>
       <RemoveUserFromProject
@@ -64,6 +66,107 @@ function DisplayUser({
         user={user}
         text={isCurrentUser ? "Leave" : "Remove"}
       />
+    </div>
+  );
+}
+
+function UserList(props: {
+  allUsers: User[];
+  currentUser: User;
+  projectId: string;
+}) {
+  const disabledRemoveButton = props.allUsers.length < 2;
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-bold">Current Users</h1>
+      <h2 className="text-lg">These are the currenct users of your project.</h2>
+      <div className="flex flex-col gap-4 overflow-y-auto">
+        <DisplayUser
+          user={props.currentUser}
+          isCurrentUser={true}
+          disabledRemoveButton={disabledRemoveButton}
+          projectId={props.projectId}
+        />
+        {props.allUsers
+          .filter((user) => user.username !== props.currentUser.username)
+          .map((user) => (
+            <DisplayUser
+              key={user.id}
+              user={user}
+              isCurrentUser={false}
+              disabledRemoveButton={disabledRemoveButton}
+              projectId={props.projectId}
+            />
+          ))}
+      </div>
+    </div>
+  );
+}
+
+function ProjectEmailSection(props: { projectId: string }) {
+  const mainEmail = env.GMAIL_USERNAME;
+  if (!mainEmail) {
+    return null;
+  }
+
+  const projectEmail = `${mainEmail.split("@")[0]}+${props.projectId}@${mainEmail.split("@")[1]}`;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-bold">Project Email</h1>
+      <Link
+        href={`mailto:${projectEmail}`}
+        className="text-lg font-thin text-link underline"
+      >
+        {projectEmail}
+      </Link>
+    </div>
+  );
+}
+
+function DeleteProjectSection(props: { user: User; projectId: string }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-bold">Delete Project </h1>
+      <h2 className="text-lg">This action cannot be undone.</h2>
+      <DeleteProject
+        user={props.user}
+        projectId={props.projectId}
+      ></DeleteProject>
+    </div>
+  );
+}
+
+function ProjectStatusSection(props: {
+  user: User;
+  projectId: string;
+  isActive: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-bold">Project Status</h1>
+      <h2 className="text-lg">
+        {`This project is currently ${props.isActive ? " active" : " archived"}.`}
+      </h2>
+      <ChangeProjectStatus
+        user={props.user}
+        projectId={props.projectId}
+        isActive={props.isActive}
+      >
+        {props.isActive ? "Finish" : "Reactivate"}
+      </ChangeProjectStatus>
+    </div>
+  );
+}
+
+function AddUserToProjectSection(props: { users: User[]; projectId: string }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-bold">Add New User</h1>
+      <h2 className="text-lg">
+        Enter the username of the user to add to the project.
+      </h2>
+      <AddUserToProject users={props.users} projectId={props.projectId} />
     </div>
   );
 }
@@ -78,11 +181,6 @@ export default async function Page({
     return redirect("/");
   }
 
-  const mainEmail = env.GMAIL_USERNAME;
-  const projectEmail = mainEmail
-    ? `${mainEmail.split("@")[0]}+${projectId}@${mainEmail.split("@")[1]}`
-    : null;
-
   const [usersNotInProject, allUsers, project] = await Promise.all([
     db.user.findMany({
       where: { NOT: { projects: { some: { id: projectId } } } },
@@ -92,7 +190,7 @@ export default async function Page({
     }),
     db.project.findFirst({
       where: { id: projectId },
-      select: { isActive: true, apiKey: true },
+      select: { isActive: true, apiKey: true, backgroundImage: true },
     }),
   ]);
 
@@ -100,83 +198,67 @@ export default async function Page({
     return redirect("/");
   }
 
-  const disabledRemoveButton = allUsers.length < 2;
-
   return (
-    <div className="max-h-full min-h-full min-w-full max-w-full overflow-y-auto rounded-2xl shadow-lg shadow-secondary scrollbar scrollbar-track-primary-foreground scrollbar-thumb-primary">
+    <div
+      className="flex max-h-full min-h-full min-w-full 
+      max-w-full flex-col 
+      overflow-y-auto rounded-2xl bg-background shadow-lg shadow-secondary 
+      scrollbar scrollbar-track-primary-foreground scrollbar-thumb-primary"
+    >
       <GoBackToProject projectId={projectId} />
-      <h1 className="mx-auto w-11/12 border-b-2 border-secondary px-16 py-10 text-center text-4xl font-bold">
+      <h1 className="mx-auto w-11/12 border-b-2 border-secondary px-16 py-10 text-center text-4xl font-thin">
         Project Settings
       </h1>
-      <div className="grid grid-cols-1 gap-4 px-16 py-12 xl:grid-cols-2 xl:gap-0">
-        <div className="flex flex-col gap-8">
-          <div className="flex w-full flex-col gap-4">
-            <h1 className="text-2xl font-bold">Add New User</h1>
-            <h2 className="text-lg">
-              Enter the username of the user to add to the project.
-            </h2>
-            <AddUserToProject users={usersNotInProject} projectId={projectId} />
-          </div>
-          <div className="flex flex-col gap-4">
-            <h1 className="text-2xl font-bold">Project Status</h1>
-            <h2 className="text-lg">
-              This project is currently{" "}
-              {project.isActive ? "active" : "archived"}.
-            </h2>
-            <ChangeProjectStatus
-              user={currentUser}
-              projectId={projectId}
-              isActive={project.isActive}
-            >
-              {project.isActive ? "Finish" : "Reactivate"}
-            </ChangeProjectStatus>
-          </div>
-          <div className="flex flex-col gap-4">
-            <h1 className="text-2xl font-bold">Delete Project </h1>
-            <h2 className="text-lg">This action cannot be undone.</h2>
-            <DeleteProject
-              user={currentUser}
-              projectId={projectId}
-            ></DeleteProject>
-          </div>
-          <DisplayApiKey apiKey={project.apiKey} projectId={projectId} />
-          {projectEmail && (
-            <div className="flex flex-col gap-4">
-              <h1 className="text-2xl font-bold">Project Email</h1>
-              <Link
-                href={`mailto:${projectEmail}`}
-                className="text-lg font-thin text-link underline"
-              >
-                {projectEmail}
-              </Link>
+      <div className="relative grow">
+        <Tabs
+          defaultValue="general"
+          className="relative flex h-full w-full flex-col gap-8 px-12 pt-2"
+        >
+          <TabsList className="w-full py-2">
+            <TabsTrigger className="w-1/3" value="general">
+              General
+            </TabsTrigger>
+            <TabsTrigger className="w-1/3" value="users">
+              Users
+            </TabsTrigger>
+            <TabsTrigger className="w-1/3" value="integrations">
+              Integrations
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="general" className="h-full">
+            <div className="grid grid-cols-1 gap-8 2xl:grid-cols-2">
+              <ProjectStatusSection
+                user={currentUser}
+                projectId={projectId}
+                isActive={project.isActive}
+              />
+              <DeleteProjectSection user={currentUser} projectId={projectId} />
+              <SetProjectBackgroundImage
+                projectId={projectId}
+                backgroundImgUrl={project?.backgroundImage ?? ""}
+              />
             </div>
-          )}
-        </div>
-        <div className="flex flex-col gap-4">
-          <h1 className="text-2xl font-bold">Current Users</h1>
-          <h2 className="text-lg">
-            These are the currenct users of your project.
-          </h2>
-          <div className="flex flex-col gap-4 overflow-y-auto">
-            <DisplayUser
-              user={currentUser}
-              isCurrentUser={true}
-              disabledRemoveButton={disabledRemoveButton}
-              projectId={projectId}
-            />
-            {allUsers
-              .filter((user) => user.username !== currentUser.username)
-              .map((user) => (
-                <DisplayUser
-                  key={user.id}
-                  user={user}
-                  isCurrentUser={false}
-                  disabledRemoveButton={disabledRemoveButton}
-                  projectId={projectId}
-                />
-              ))}
-          </div>
-        </div>
+          </TabsContent>
+          <TabsContent value="users">
+            <div className="grid grid-cols-1 gap-8 2xl:grid-cols-2">
+              <AddUserToProjectSection
+                users={usersNotInProject}
+                projectId={projectId}
+              />
+              <UserList
+                allUsers={allUsers}
+                currentUser={currentUser}
+                projectId={projectId}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="integrations">
+            <div className="grid grid-cols-1 gap-8 2xl:grid-cols-2">
+              <DisplayApiKey apiKey={project.apiKey} projectId={projectId} />
+              <ProjectEmailSection projectId={projectId} />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
