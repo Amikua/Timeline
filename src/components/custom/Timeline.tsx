@@ -91,7 +91,7 @@ export function Timeline({
         filteredEvents={filteredEvents}
         projectName={projectName}
         projectId={projectId}
-        setCurrenctDate={setCurrentDate}
+        setCurrentDate={setCurrentDate}
         setScrollToIndex={setScrollToIndex}
         scrollToIndex={scrollToIndex}
         withoutAutoScroll={withoutAutoScroll}

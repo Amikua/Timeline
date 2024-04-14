@@ -121,7 +121,6 @@ export function InfiniteScrollHorizontal({
     if (listContainerRef.current && newScrollPosition) {
       // listContainerRef.current.scrollLeft = newScrollPosition;
       const it = listContainerRef.current;
-      console.log(it.scrollWidth, it.scrollLeft, newScrollPosition);
       listContainerRef.current.scrollLeft =
         listContainerRef.current.scrollWidth - newScrollPosition;
       setNewScrollPosition(undefined);
