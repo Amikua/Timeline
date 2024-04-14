@@ -209,10 +209,10 @@ export default async function Page({
       <h1 className="mx-auto w-11/12 border-b-2 border-secondary px-16 py-10 text-center text-4xl font-thin">
         Project Settings
       </h1>
-      <div className="relative grow">
+      <div className="grow">
         <Tabs
           defaultValue="general"
-          className="relative flex h-full w-full flex-col gap-8 px-12 pt-2"
+          className="flex h-full w-full flex-col gap-8 px-12 pt-2"
         >
           <TabsList className="w-full py-2">
             <TabsTrigger className="w-1/3" value="general">
@@ -226,7 +226,7 @@ export default async function Page({
             </TabsTrigger>
           </TabsList>
           <TabsContent value="general" className="h-full">
-            <div className="grid grid-cols-1 gap-8 2xl:grid-cols-2">
+            <div className="min-h-full auto-rows-max grid grid-cols-1 gap-8 2xl:grid-cols-2">
               <ProjectStatusSection
                 user={currentUser}
                 projectId={projectId}

@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { type User } from "@prisma/client";
 import { changeProjectStatus } from "./actions";
 import Confetti from "react-confetti";
@@ -28,11 +28,14 @@ export function ChangeProjectStatus({
   const [didFinish, setDidFinish] = useState(false);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
+  const divRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const { width, height } = window.screen;
-    setWidth(width);
-    setHeight(height);
+    if (divRef.current) {
+      const { width, height } = divRef.current.getBoundingClientRect();
+      setWidth(width);
+      setHeight(height);
+    }
   }, []);
 
   useEffect(() => {
@@ -45,7 +48,7 @@ export function ChangeProjectStatus({
 
   return (
     <>
-      <div className="absolute left-0 top-0">
+      <div className="absolute left-0 top-0 w-full h-full pointer-events-none" ref={divRef}>
         {didFinish && (
           <Confetti
             width={width}
