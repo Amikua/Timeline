@@ -39,7 +39,8 @@ model Project {
   name            String   @db.VarChar(255)
   apiKey          String   @default(uuid())
   isActive        Boolean  @default(true)
-  backgroundImage String?
+  backgroundImageLightMode String?
+  backgroundImageDarkMode String?
 
   authorId String
   author   User   @relation("OwnedProjects", fields: [authorId], references: [id])

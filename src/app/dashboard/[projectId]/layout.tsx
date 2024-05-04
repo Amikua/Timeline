@@ -16,7 +16,8 @@ export default async function RootLayout({
   // Check if user is in the project
   const project = await db.project.findFirst({
     select: {
-      backgroundImage: true,
+      backgroundImageLightMode: true,
+      backgroundImageDarkMode: true,
       users: {
         select: {
           id: true,
@@ -34,13 +35,12 @@ export default async function RootLayout({
 
   return (
     <div
-      className="max-h-screen; relative flex h-1 min-h-full min-w-full max-w-full flex-col justify-between p-16"
+      className={`relative flex h-1 max-h-screen min-h-full min-w-full max-w-full flex-col justify-between bg-cover
+        bg-no-repeat p-16 bg-[image:var(--light-image-url)] dark:bg-[image:var(--dark-image-url)]`}
       style={{
-        backgroundImage: project?.backgroundImage
-          ? `url(${project.backgroundImage})`
-          : "",
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat"
+        // @ts-expect-error Typescript doesn't allow setting CSS variables in style but we can actually do that
+        "--light-image-url": `url(${project?.backgroundImageLightMode})`,
+        "--dark-image-url": `url(${project?.backgroundImageDarkMode})`,
       }}
     >
       {children}

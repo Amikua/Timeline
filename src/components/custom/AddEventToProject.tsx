@@ -48,7 +48,7 @@ export function AddEventToProject({
         <Button
           variant="default"
           disabled={!isActive}
-          className="w-12 h-12 z-10 absolute text-4xl font-thin bottom-6 right-6 bg-primary text-foreground rounded-full disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-12 h-12 z-10 absolute text-4xl font-thin bottom-6 right-6 bg-primary text-white dark:text-foreground rounded-full disabled:cursor-not-allowed disabled:opacity-50"
         >
           +
         </Button>

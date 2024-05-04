@@ -5,7 +5,7 @@ import { useState } from "react";
 export function GithubLoginButton() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   return (
-    <div className="flex h-20 w-48 items-center justify-center rounded-2xl bg-zinc-900">
+    <div className="flex h-20 w-48 items-center justify-center rounded-2xl bg-secondary text-foreground">
       {isSigningIn ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />

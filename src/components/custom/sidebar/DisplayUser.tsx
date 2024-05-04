@@ -19,12 +19,12 @@ function Logout() {
 
 export function DisplayUser({ user }: { user: User }) {
   return (
-    <div className="flex place-content-between pl-4 pb-4 border-b-2 border-gray-700">
+    <div className="flex place-content-between pl-4 pb-4 border-b-2 border-muted">
       <div className="flex gap-2">
         <Image alt="Avatar of current user" width={32} height={32} className="size-8 rounded-2xl" src={user.avatarUrl} />
         <div>
-          <h1 className="text-white">Welcome {user.username}</h1>
-          <h2 className="text-sm text-stone-200">{user.email}</h2>
+          <h1 className="text-foreground">Welcome {user.username}</h1>
+          <h2 className="text-sm text-stone-700 dark:text-stone-200">{user.email}</h2>
         </div>
       </div>
       <Logout />

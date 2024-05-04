@@ -76,17 +76,24 @@ export const regenerateProjectApiKey = action(
 
 export const setProjectBackgroundImage = action(
   setProjectBackgroundImageSchema,
-  async ({ projectId, url }) => {
+  async ({ projectId, url, theme }) => {
     const { user } = await validateRequest();
     if (!user) {
       return {
         error: "Unauthorized",
       };
     }
-    await db.project.update({
-      where: { id: projectId },
-      data: { backgroundImage: url },
-    });
+    if (theme === "light") {
+      await db.project.update({
+        where: { id: projectId },
+        data: { backgroundImageLightMode: url },
+      });
+    } else {
+      await db.project.update({
+        where: { id: projectId },
+        data: { backgroundImageDarkMode: url },
+      });
+    }
     revalidatePath(`/dashboard/${projectId}`);
   },
 );

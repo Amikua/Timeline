@@ -190,7 +190,7 @@ export default async function Page({
     }),
     db.project.findFirst({
       where: { id: projectId },
-      select: { isActive: true, apiKey: true, backgroundImage: true },
+      select: { isActive: true, apiKey: true, backgroundImageLightMode: true, backgroundImageDarkMode: true },
     }),
   ]);
 
@@ -235,7 +235,13 @@ export default async function Page({
               <DeleteProjectSection user={currentUser} projectId={projectId} />
               <SetProjectBackgroundImage
                 projectId={projectId}
-                backgroundImgUrl={project?.backgroundImage ?? ""}
+                backgroundImgUrl={project?.backgroundImageLightMode ?? ""}
+                theme="light"
+              />
+              <SetProjectBackgroundImage
+                projectId={projectId}
+                backgroundImgUrl={project?.backgroundImageDarkMode ?? ""}
+                theme="dark"
               />
             </div>
           </TabsContent>

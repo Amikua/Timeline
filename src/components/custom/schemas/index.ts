@@ -12,6 +12,7 @@ export const addProjectSchema = z.object({
 export const setProjectBackgroundImageSchema = z.object({
   projectId: z.string().min(1),
   url: z.string(),
+  theme: z.enum(["light", "dark"]),
 });
 
 export const changeProjectStatusSchema = z.object({

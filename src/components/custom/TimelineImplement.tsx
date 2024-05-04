@@ -4,6 +4,7 @@ import { getAllProjectEventsWithFilter, getProjectEvents } from "./actions";
 import Link from "next/link";
 import { type Category } from "@prisma/client";
 import { categoryEmotes } from "./AddCategoryToPost";
+import { useTheme } from "next-themes";
 
 function getScrollToIndex(events: EventAndAuthor[], date: string) {
   const index = events.findIndex((event) => {
@@ -61,12 +62,30 @@ const getSeason = (month: number) => {
   }
 };
 
-const seasonToColor = {
+const seasonToColorLight = {
+  winter: "hsl(210, 50%, 70%)",
+  spring: "hsl(120deg 26.63% 75.66%)",
+  summer: "hsl(10, 90%, 75%)",
+  fall: "hsl(30, 50%, 70%)",
+};
+
+const seasonToColorDark = {
   winter: "hsl(210, 30%, 40%)",
   spring: "hsl(120deg 26.63% 45.66%)",
   summer: "hsl(10, 90%, 55%)",
   fall: "hsl(30, 50%, 40%)",
 };
+
+function seasonToColor(
+  season: "winter" | "spring" | "summer" | "fall",
+  theme?: string,
+) {
+  if (theme === "light") {
+    return seasonToColorLight[season];
+  } else {
+    return seasonToColorDark[season];
+  }
+}
 
 export function InfiniteScrollHorizontal({
   events,
@@ -105,6 +124,8 @@ export function InfiniteScrollHorizontal({
   const [newScrollPosition, setNewScrollPosition] = useState<
     number | undefined
   >();
+
+  const theme = useTheme();
 
   useEffect(() => {
     if (currentDateRef.current) {
@@ -183,7 +204,7 @@ export function InfiniteScrollHorizontal({
   return (
     <div
       ref={listContainerRef}
-      className="relative h-36 min-h-36 shrink-0 overflow-auto px-8 scrollbar scrollbar-track-background scrollbar-thumb-background"
+      className="relative h-36 min-h-36 shrink-0 overflow-auto px-8 scrollbar scrollbar-track-transparent scrollbar-thumb-transparent"
     >
       <div className="relative flex h-full w-fit min-w-full flex-row-reverse border-b-2 border-secondary">
         {Object.entries(eventsGroupByDay).map(([date, data], index) => {
@@ -278,11 +299,14 @@ export function InfiniteScrollHorizontal({
                   backgroundColor:
                     currentDate === date
                       ? "hsl(var(--primary))"
-                      : seasonToColor[getSeason(currentDateObj.getMonth())],
+                      : seasonToColor(
+                          getSeason(currentDateObj.getMonth()),
+                          theme.resolvedTheme,
+                        ),
                   boxShadow:
                     currentDate === date
                       ? "0px 0px 10px 5px hsl(var(--primary))"
-                      : `0px 0px 10px 5px ${seasonToColor[getSeason(currentDateObj.getMonth())]}`,
+                      : `0px 0px 10px 5px ${seasonToColor(getSeason(currentDateObj.getMonth()), theme.resolvedTheme)}`,
                 }}
               >
                 {categoryEmotes[mostOftenCategories.at(0)!].emoji}
@@ -294,11 +318,14 @@ export function InfiniteScrollHorizontal({
                     backgroundColor:
                       currentDate === date
                         ? "hsl(var(--primary))"
-                        : seasonToColor[getSeason(currentDateObj.getMonth())],
+                        : seasonToColor(
+                            getSeason(currentDateObj.getMonth()),
+                            theme.resolvedTheme,
+                          ),
                     boxShadow:
                       currentDate === date
                         ? "0px 0px 10px 5px hsl(var(--primary))"
-                        : `0px 0px 10px 5px ${seasonToColor[getSeason(currentDateObj.getMonth())]}`,
+                        : `0px 0px 10px 5px ${seasonToColor(getSeason(currentDateObj.getMonth()), theme.resolvedTheme)}`,
                   }}
                 >
                   {categoryEmotes[mostOftenCategories.at(1)!].emoji}
@@ -306,16 +333,19 @@ export function InfiniteScrollHorizontal({
               ) : null}
               {mostOftenCategories.length > 3 ? (
                 <span
-                  className="h-5 w-5 p-1 rounded-full text-center text-2xs"
+                  className="h-5 w-5 rounded-full p-1 text-center text-2xs"
                   style={{
                     backgroundColor:
                       currentDate === date
                         ? "hsl(var(--primary))"
-                        : seasonToColor[getSeason(currentDateObj.getMonth())],
+                        : seasonToColor(
+                            getSeason(currentDateObj.getMonth()),
+                            theme.resolvedTheme,
+                          ),
                     boxShadow:
                       currentDate === date
                         ? "0px 0px 10px 5px hsl(var(--primary))"
-                        : `0px 0px 10px 5px ${seasonToColor[getSeason(currentDateObj.getMonth())]}`,
+                        : `0px 0px 10px 5px ${seasonToColor(getSeason(currentDateObj.getMonth()), theme.resolvedTheme)}`,
                   }}
                 >
                   {categoryEmotes[mostOftenCategories.at(2)!].emoji}
@@ -327,7 +357,10 @@ export function InfiniteScrollHorizontal({
                   backgroundColor:
                     currentDate === date
                       ? "hsl(var(--primary))"
-                      : seasonToColor[getSeason(currentDateObj.getMonth())],
+                      : seasonToColor(
+                          getSeason(currentDateObj.getMonth()),
+                          theme.resolvedTheme,
+                        ),
                 }}
               ></div>
               {absoluteDifferenceInMonths > 0 && nextDateObj && (

@@ -24,7 +24,7 @@ export function FilterProjects({
   };
 
   return (
-    <div className="flex place-content-between gap-2 border-b-2 border-gray-700 px-1 pb-6">
+    <div className="flex place-content-between gap-2 border-b-2 border-muted px-1 pb-6">
       <Input
         className="border-primary"
         placeholder="Search Project"

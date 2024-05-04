@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 export function SetProjectBackgroundImage(props: {
   projectId: string;
   backgroundImgUrl: string;
+  theme: 'light' | 'dark'
 }) {
   const [backgroundImgUrl, setBackgroundImgUrl] = useState(
     props.backgroundImgUrl,
@@ -15,10 +16,10 @@ export function SetProjectBackgroundImage(props: {
     <form
       className="flex flex-col gap-4"
       action={async () => {
-        await setProjectBackgroundImage({ projectId: props.projectId, url: backgroundImgUrl });
+        await setProjectBackgroundImage({ projectId: props.projectId, url: backgroundImgUrl, theme: props.theme });
       }}
     >
-      <h1 className="text-2xl font-bold">Background Image</h1>
+      <h1 className="text-2xl font-bold">Background Image for {props.theme === 'light' ? 'Light' : 'Dark'} Mode</h1>
       <div className="flex max-w-full gap-4">
         <Input
           className="w-64"

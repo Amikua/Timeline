@@ -61,7 +61,7 @@ export function AddProject() {
                 name="name"
                 minLength={1}
                 required
-                className="col-span-3 bg-zinc-800 text-white"
+                className="col-span-3"
               />
             </div>
           </div>

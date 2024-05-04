@@ -85,7 +85,7 @@ async function LazyFilterAndDisplayProjects({ user }: { user: User }) {
 
 export default async function Sidebar({ user }: { user: User }) {
   return (
-    <nav className="relative h-screen min-w-96 max-w-96 border-r border-gray-700">
+    <nav className="relative h-screen min-w-96 max-w-96 border-r border-muted">
       <div className="flex h-full max-h-full flex-col justify-between gap-12 px-6 pt-12">
         <div className="flex min-h-0 flex-1 flex-col gap-6">
           <DisplayUser user={user} />

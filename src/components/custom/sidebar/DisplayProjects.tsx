@@ -5,6 +5,7 @@ import Link from "next/link";
 import tinycolor from "tinycolor2";
 import { type filter } from "./FilterAndDisplayProjects";
 import Image from "next/image";
+import { useTheme } from "next-themes";
 
 export function DisplayProjects({
   projects,
@@ -20,8 +21,12 @@ export function DisplayProjects({
     <main className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden  scrollbar scrollbar-track-background scrollbar-thumb-primary">
       {projects
         .filter((project) => {
-          if (!project.name.toLowerCase().startsWith(projectNameFilter.toLowerCase())) {
-            return false
+          if (
+            !project.name
+              .toLowerCase()
+              .startsWith(projectNameFilter.toLowerCase())
+          ) {
+            return false;
           }
           if (projectStatusFilter === "all") {
             return true;
@@ -42,7 +47,7 @@ export function DisplayProjects({
   );
 }
 
-const getColorForProjectName = (name: string): string => {
+const getColorForProjectName = (name: string, theme?: string): string => {
   let hashCode = 0;
   for (let i = 0; i < name.length; i++) {
     hashCode = (hashCode << 5) - hashCode + name.charCodeAt(i);
@@ -50,7 +55,7 @@ const getColorForProjectName = (name: string): string => {
   }
   const normalizedValue = ((hashCode % 360) + 360) % 360;
   const hue = normalizedValue;
-  const color = tinycolor({ h: hue, s: 70, l: 30 }); // adjust saturation (s) and lightness (l) for different effects
+  const color = tinycolor({ h: hue, s: 70, l: theme === "dark" ? 30 : 69 }); // adjust saturation (s) and lightness (l) for different effects
   return color.toHexString();
 };
 
@@ -63,17 +68,21 @@ function DisplayProject({
 }) {
   // Slice the users array to display only the first three users
   const displayedUsers = project.users.slice(0, 3);
+  const theme = useTheme();
 
   return (
     <Link href={`/dashboard/${project.id}`} className="max-w-[97%] pl-1">
       <div
-        className={`flex flex-shrink-0 items-center gap-4  rounded-lg py-4 pl-4 shadow shadow-gray-700 hover:brightness-125 ${isActive ? "brightness-100" : "brightness-50"}`}
+        className={`flex flex-shrink-0 items-center gap-4 rounded-lg py-4 pl-4
+         transition-all duration-200 ease-in-out
+        shadow shadow-muted hover:brightness-105
+        dark:hover:brightness-125 ${isActive ? "brightness-100" : "brightness-75 dark:brightness-50"}`}
       >
         <div
           className="flex size-12 min-h-[3rem] min-w-[3rem] items-center justify-center rounded-lg"
           style={{
             backgroundColor: project.isActive
-              ? getColorForProjectName(project.name)
+              ? getColorForProjectName(project.name, theme.resolvedTheme)
               : undefined,
           }}
         >
@@ -109,10 +118,14 @@ function DisplayProject({
             Creator: {project.author.username}
           </h2>
         </div>
-        
-        <div className="ml-auto mr-4 min-w-max flex items-center space-x-[-4px] relative">
+
+        <div className="relative ml-auto mr-4 flex min-w-max items-center space-x-[-4px]">
           {displayedUsers.map((user, index) => (
-            <div key={index} className="relative" style={{ zIndex: displayedUsers.length - index }}>
+            <div
+              key={index}
+              className="relative"
+              style={{ zIndex: displayedUsers.length - index }}
+            >
               <Image
                 alt={`Avatar of users`}
                 width={32}
@@ -130,7 +143,9 @@ function DisplayProject({
           ))}
           {project._count.users > 3 && (
             <div className="relative left-[6px]">
-              <h2 className="text-sm text-foreground">+{project._count.users - 3}</h2>
+              <h2 className="text-sm text-foreground">
+                +{project._count.users - 3}
+              </h2>
             </div>
           )}
         </div>
@@ -138,7 +153,6 @@ function DisplayProject({
     </Link>
   );
 }
-
 
 export type ProjectWithAuthorAndUsers = Prisma.ProjectGetPayload<{
   include: {
@@ -155,7 +169,7 @@ export type ProjectWithAuthorAndUsers = Prisma.ProjectGetPayload<{
     users: {
       select: {
         avatarUrl: true;
-      }
-    }
+      };
+    };
   };
 }>;
