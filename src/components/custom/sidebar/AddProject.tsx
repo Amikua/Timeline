@@ -32,7 +32,7 @@ export function AddProject() {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="mb-4 py-6 border-2 rounded-lg border-border"
+          className="mb-4 py-6 border-2 rounded-lg border-primary"
         >
           Add new project
         </Button>

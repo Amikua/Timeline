@@ -181,7 +181,7 @@ export default async function Page({
     return redirect("/");
   }
 
-  const [usersNotInProject, allUsers, project] = await Promise.all([
+  const [usersNotInProject, allUsers, project, apiKey] = await Promise.all([
     db.user.findMany({
       where: { NOT: { projects: { some: { id: projectId } } } },
     }),
@@ -190,8 +190,17 @@ export default async function Page({
     }),
     db.project.findFirst({
       where: { id: projectId },
-      select: { isActive: true, apiKey: true, backgroundImageLightMode: true, backgroundImageDarkMode: true },
+      select: { isActive: true, backgroundImageLightMode: true, backgroundImageDarkMode: true },
     }),
+    db.apiKey.findUnique({
+      select: { apiKey: true },
+      where: {
+        userId_projectId: {
+          userId: currentUser.id,
+          projectId: projectId,
+        }
+      }
+    })
   ]);
 
   if (!project) {
@@ -260,7 +269,7 @@ export default async function Page({
           </TabsContent>
           <TabsContent value="integrations">
             <div className="grid grid-cols-1 gap-8 2xl:grid-cols-2">
-              <DisplayApiKey apiKey={project.apiKey} projectId={projectId} />
+              <DisplayApiKey apiKey={apiKey?.apiKey} projectId={projectId} />
               <ProjectEmailSection projectId={projectId} />
             </div>
           </TabsContent>

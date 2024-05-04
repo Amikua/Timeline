@@ -21,7 +21,7 @@ import {
   addEventToProjectSchema,
   addProjectSchema,
   getAllEventsWithFilterSchema,
-  regenerateProjectApiKeySchema,
+  createOrUpdateApiKeySchema,
   setProjectBackgroundImageSchema,
 } from "../schemas";
 
@@ -48,8 +48,8 @@ export async function checkForEventFromEmail() {
   return {};
 }
 
-export const regenerateProjectApiKey = action(
-  regenerateProjectApiKeySchema,
+export const createOrUpdateApiKey = action(
+  createOrUpdateApiKeySchema,
   async ({ projectId }) => {
     const { user } = await validateRequest();
     if (!user) {
@@ -57,19 +57,34 @@ export const regenerateProjectApiKey = action(
         error: "Unauthorized",
       };
     }
+
     const project = await db.project.findFirst({
       where: { id: projectId },
-      select: { apiKey: true },
     });
+
     if (!project) {
       return {
         error: "Project not found",
       };
     }
-    await db.project.update({
-      where: { id: projectId },
-      data: { apiKey: uuidv4() },
-    });
+
+    await db.apiKey.upsert({
+      where: { 
+        userId_projectId: {
+          userId: user.id,
+          projectId: projectId,
+        }
+      },
+      create: {
+        projectId,
+        userId: user.id,
+        apiKey: uuidv4(),
+      },
+      update: {
+        apiKey: uuidv4(),
+      },
+    })
+
     revalidatePath(`/dashboard/${projectId}/settings`);
   },
 );
@@ -104,7 +119,7 @@ export const getAllEvents = action(
     const { user } = await validateRequest();
     if (!user) {
       return {
-        error: "Unathorized",
+        error: "Unauthorized",
       };
     }
     const events = await db.projectEvent.findMany({

@@ -18,11 +18,9 @@ jobs:
 
       - name: Call API Endpoint
         env:
-          PROJECT_ID: ${{ secrets.PROJECT_ID }}
-          USERNAME: ${{ secrets.USERNAME }}
           API_KEY: ${{ secrets.API_KEY }}
           COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
         run: |
           curl -X POST "https://timeline-amikua.vercel.app/api/events" \
             -H "Content-Type: application/json" \
-            -d '{"projectId": "${{ env.PROJECT_ID }}", "content": "${{ env.COMMIT_MESSAGE }}", "category": "ROCKET", "username": "${{ env.USERNAME }}", "apiKey": "${{ env.API_KEY }}"}'
+            -d '{"content": "${{ env.COMMIT_MESSAGE }}", "category": "ROCKET", "apiKey": "${{ env.API_KEY }}"}'

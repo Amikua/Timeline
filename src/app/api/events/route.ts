@@ -1,46 +1,45 @@
-import { addEventToProjectSchema } from "~/components/custom/schemas";
 import { z } from "zod";
 import { db } from "~/server/db";
+import { Category } from "@prisma/client";
 
 const schema = z.object({
   apiKey: z.string().min(1),
-  username: z.string().min(1),
+  content: z.string().min(1),
+  happenedAt: z.date().optional(),
+  category: z.nativeEnum(Category),
 });
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    const validatedBody = addEventToProjectSchema
-      .merge(schema)
-      .parse(await request.json());
-    
-    const project = await db.project.findFirst({
+    const validatedBody = schema.parse(await request.json());
+
+    const query = await db.apiKey.findUnique({
       select: {
+        project: {
+          select: {
+            isActive: true,
+          },
+        },
+        userId: true,
+        projectId: true,
         apiKey: true,
-        isActive: true,
       },
       where: {
-        id: validatedBody.projectId,
+        apiKey: validatedBody.apiKey,
       },
     });
 
-    if (!project) {
-      return new Response(null, {
-        status: 404,
-        statusText: "Project Not Found",
-      });
-    }
-
-    if (project.apiKey !== validatedBody.apiKey ) {
+    if (!query) {
       return new Response(null, {
         status: 401,
         statusText: "Unauthorized",
       });
     }
 
-    if (!project.isActive) {
+    if (!query?.project?.isActive) {
       return new Response(null, {
         status: 403,
-        statusText: "Forbidden",
+        statusText: "Forbidden: Project is not active",
       });
     }
 
@@ -48,18 +47,19 @@ export async function POST(request: Request): Promise<Response> {
       data: {
         content: validatedBody.content,
         category: validatedBody.category,
+        happendAt: validatedBody.happenedAt,
         author: {
           connect: {
-            username: validatedBody.username,
-          }
+            id: query.userId,
+          },
         },
         Project: {
           connect: {
-            id: validatedBody.projectId,
-          }
-        }
-      }
-    })
+            id: query.projectId,
+          },
+        },
+      },
+    });
     return new Response(null, {
       statusText: "Created",
       status: 201,
