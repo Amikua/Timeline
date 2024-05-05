@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { PrintEventsView } from "~/components/custom/PrintEventsView";
 import { AutoPrint } from "./autoprint";
+import { validateRequest } from "~/lib/auth";
+import { redirect } from "next/navigation";
 
 function GoBackToProject({ projectId }: { projectId: string }) {
   return (
@@ -26,6 +28,11 @@ export default async function Page({
 }: {
   params: { projectId: string };
 }) {
+
+  const { user } = await validateRequest();
+  if (!user) {
+    return redirect("/");
+  }
 
   
   return (
