@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Sidebar from "~/components/custom/sidebar";
 import { validateRequest } from "~/lib/auth";
 import { redirect } from "next/navigation";
-import { db } from "~/server/db";
 
 export const metadata: Metadata = {
   title: "Timeline Dashboard",

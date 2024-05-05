@@ -5,7 +5,7 @@ import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
 import InfiniteScrollHorizontal from "./TimelineImplement";
 import { EVENTS_PER_REQUEST } from "~/constants";
 import { checkForEventFromEmailCached } from "./actions";
-import { Category } from "@prisma/client";
+import type { Category } from "@prisma/client";
 
 export function getScrollToIndex(events: EventAndAuthor[], date: string) {
   const index = events.findIndex((event) => {

@@ -140,8 +140,6 @@ export function InfiniteScrollHorizontal({
 
   useLayoutEffect(() => {
     if (listContainerRef.current && newScrollPosition) {
-      // listContainerRef.current.scrollLeft = newScrollPosition;
-      const it = listContainerRef.current;
       listContainerRef.current.scrollLeft =
         listContainerRef.current.scrollWidth - newScrollPosition;
       setNewScrollPosition(undefined);

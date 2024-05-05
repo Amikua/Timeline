@@ -52,7 +52,7 @@ export function EventsFilter({
             <CommandItem
               value={""}
               className="cursor-pointer"
-              onSelect={(currentValue) => {
+              onSelect={(_) => {
                 setFilter("");
                 setOpen(false);
               }}
