@@ -3,6 +3,7 @@ import { logout } from "~/components/custom/actions";
 import Image from "next/image";
 
 function Logout() {
+  console.log("test");
   return (
     <form action={logout}>
       <button>
