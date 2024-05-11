@@ -268,6 +268,14 @@ export const deleteProject = action(
     if (!user) {
       return { error: "Unauthorized" };
     }
+
+
+    await db.apiKey.deleteMany({
+      where: {
+        projectId,
+      },
+    })
+    
     await db.project.delete({
       where: { id: projectId },
     });
