@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { db } from "~/server/db";
 import { Category } from "@prisma/client";
+import Bugsnag from "@bugsnag/js";
+import { initBugsnag } from "~/lib/bugsnag";
 
 const schema = z.object({
   apiKey: z.string().min(1),
@@ -65,8 +67,9 @@ export async function POST(request: Request): Promise<Response> {
       status: 201,
     });
   } catch (error) {
-    console.error(error);
     if (error instanceof Error) {
+      initBugsnag();
+      Bugsnag.notify(error);
       return new Response(null, {
         status: 400,
         statusText: `Bad Request: ${JSON.stringify(error.message)}`,
