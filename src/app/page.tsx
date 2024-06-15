@@ -20,7 +20,7 @@ export default async function Page() {
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
-            href="timelineamikua@gmail.com"
+            href="mailto:timelineamikua@gmail.com"
             className="text-sm font-medium underline-offset-4 hover:underline"
             prefetch={false}
           >
