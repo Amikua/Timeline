@@ -76,7 +76,7 @@ function DisplayProject({
         className={`flex flex-shrink-0 items-center gap-4 rounded-lg py-4 pl-4
          transition-all duration-200 ease-in-out
         shadow shadow-muted hover:brightness-105
-        dark:hover:brightness-125 ${isActive ? "brightness-100" : "brightness-75 dark:brightness-50"}`}
+        dark:hover:brightness-125 ${isActive ? "brightness-100 shadow-primary" : "brightness-75 dark:brightness-50"}`}
       >
         <div
           className="flex size-12 min-h-[3rem] min-w-[3rem] items-center justify-center rounded-lg"
