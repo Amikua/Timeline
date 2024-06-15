@@ -22,16 +22,24 @@ function RemoveEventButton(props: {
   setEvents: (events: EventAndAuthor[]) => void;
   isActive: boolean;
 }) {
-  if (props.userId !== props.events.find((event) => event.id === props.eventId)?.author.id)
+  if (
+    props.userId !==
+    props.events.find((event) => event.id === props.eventId)?.author.id
+  )
     return null;
   return (
     <button
       disabled={!props.isActive}
       onClick={async () => {
         try {
-          const it = await removeEventFromProject({ projectId: props.projectId, eventId: props.eventId });
+          const it = await removeEventFromProject({
+            projectId: props.projectId,
+            eventId: props.eventId,
+          });
           if (!it?.data?.error) {
-            props.setEvents(props.events.filter((event) => event.id !== props.eventId));
+            props.setEvents(
+              props.events.filter((event) => event.id !== props.eventId),
+            );
           }
         } catch (error) {
           console.error("Error removing event", error);
@@ -218,9 +226,17 @@ function useInfiniteEventScrollWithTimelineAutoScroll({
           const newEvents = response.data!.events!;
           setHasMore(response.data!.hasMore!);
           if (Array.isArray(newEvents)) {
-            setEvents([...events, ...newEvents]);
+            if (filter) {
+              setEvents(newEvents)
+            } else {
+              setEvents([...events, ...newEvents]);
+            }
           } else {
-            setEvents([...events, newEvents]);
+            if (filter) {
+              setEvents(newEvents)
+            } else {
+              setEvents([...events, newEvents]);
+            }
           }
         } catch (error) {
           console.error("Error fetching next page", error);

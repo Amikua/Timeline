@@ -149,15 +149,12 @@ export function InfiniteScrollHorizontal({
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting && !isFetchingNextPage && hasMore) {
+        if (entries[0]?.isIntersecting && !isFetchingNextPage && hasMore && !filter) {
           setIsFetchingNextPage(true);
-          (filter
-            ? getAllProjectEventsWithFilter({ projectId, filter })
-            : getProjectEvents({
-                projectId,
-                offset: events.length,
-              })
-          )
+            getProjectEvents({
+              projectId,
+              offset: events.length,
+            })
             .then((response) => {
               const newEvents = response.data!.events!;
               setHasMore(response.data!.hasMore!);
@@ -223,7 +220,7 @@ export function InfiniteScrollHorizontal({
             );
             differenceInDays = Math.floor(
               (previousDateObj.getTime() - currentDateObj.getTime()) /
-                (1000 * 60 * 60 * 24),
+              (1000 * 60 * 60 * 24),
             );
           }
 
@@ -236,8 +233,8 @@ export function InfiniteScrollHorizontal({
             // absoluteDifferenceInMonths = Math.abs(previousDateObj.getMonth() - currentDateObj.getMonth() + (12 * (previousDateObj.getFullYear() - currentDateObj.getFullYear())));
             absoluteDifferenceInMonths = Math.abs(
               nextDateObj.getMonth() -
-                currentDateObj.getMonth() +
-                12 * (nextDateObj.getFullYear() - currentDateObj.getFullYear()),
+              currentDateObj.getMonth() +
+              12 * (nextDateObj.getFullYear() - currentDateObj.getFullYear()),
             );
           }
 
@@ -298,9 +295,9 @@ export function InfiniteScrollHorizontal({
                     currentDate === date
                       ? "hsl(var(--primary))"
                       : seasonToColor(
-                          getSeason(currentDateObj.getMonth()),
-                          theme.resolvedTheme,
-                        ),
+                        getSeason(currentDateObj.getMonth()),
+                        theme.resolvedTheme,
+                      ),
                   boxShadow:
                     currentDate === date
                       ? "0px 0px 10px 5px hsl(var(--primary))"
@@ -317,9 +314,9 @@ export function InfiniteScrollHorizontal({
                       currentDate === date
                         ? "hsl(var(--primary))"
                         : seasonToColor(
-                            getSeason(currentDateObj.getMonth()),
-                            theme.resolvedTheme,
-                          ),
+                          getSeason(currentDateObj.getMonth()),
+                          theme.resolvedTheme,
+                        ),
                     boxShadow:
                       currentDate === date
                         ? "0px 0px 10px 5px hsl(var(--primary))"
@@ -337,9 +334,9 @@ export function InfiniteScrollHorizontal({
                       currentDate === date
                         ? "hsl(var(--primary))"
                         : seasonToColor(
-                            getSeason(currentDateObj.getMonth()),
-                            theme.resolvedTheme,
-                          ),
+                          getSeason(currentDateObj.getMonth()),
+                          theme.resolvedTheme,
+                        ),
                     boxShadow:
                       currentDate === date
                         ? "0px 0px 10px 5px hsl(var(--primary))"
@@ -356,9 +353,9 @@ export function InfiniteScrollHorizontal({
                     currentDate === date
                       ? "hsl(var(--primary))"
                       : seasonToColor(
-                          getSeason(currentDateObj.getMonth()),
-                          theme.resolvedTheme,
-                        ),
+                        getSeason(currentDateObj.getMonth()),
+                        theme.resolvedTheme,
+                      ),
                 }}
               ></div>
               {absoluteDifferenceInMonths > 0 && nextDateObj && (
