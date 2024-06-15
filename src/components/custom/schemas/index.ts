@@ -43,6 +43,15 @@ export const addEventToProjectSchema = z.object({
   category: z.nativeEnum(Category),
 });
 
+export const updateEventSchema = z.object({
+  projectId: z.string().min(1),
+  eventId: z.string().min(1),
+
+  content: z.string().min(1).optional(),
+  happendAt: z.date().optional(),
+  category: z.nativeEnum(Category).optional(),
+});
+
 export const removeEventFromProjectSchema = z.object({
   projectId: z.string().min(1),
   eventId: z.string().min(1),

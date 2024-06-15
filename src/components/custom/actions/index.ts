@@ -23,6 +23,7 @@ import {
   getAllEventsWithFilterSchema,
   createOrUpdateApiKeySchema,
   setProjectBackgroundImageSchema,
+  updateEventSchema,
 } from "../schemas";
 
 export const checkForEventFromEmailCached = unstable_cache(
@@ -379,6 +380,48 @@ export const addEventToProject = action(
         },
         include: { author: true },
       });
+      revalidatePath(`/dashboard/${projectId}`);
+      return { event };
+    } catch (err) {
+      console.error(err);
+      revalidatePath(`/dashboard/${projectId}`);
+      return {
+        error: "Error creating event",
+      };
+    }
+  },
+);
+
+export const updateEvent = action(
+  updateEventSchema,
+  async ({ projectId, content, happendAt, category, eventId }) => {
+    const { user } = await validateRequest();
+    if (!user) {
+      return {
+        error: "Unauthorized",
+      };
+    }
+    try {
+      const project = await db.project.findFirst({
+        where: { id: projectId },
+        select: { isActive: true },
+      });
+      if (!project?.isActive) {
+        return {
+          error: "Project is not active",
+        };
+      }
+
+      const event = await db.projectEvent.update({
+        where: { id: eventId, authorId: user.id },
+        data: {
+          content,
+          happendAt,
+          category,
+        },
+        include: { author: true },
+      });
+
       revalidatePath(`/dashboard/${projectId}`);
       return { event };
     } catch (err) {

@@ -13,6 +13,7 @@ import { removeEventFromProject } from "./actions";
 import { categoryEmotes } from "./AddCategoryToPost";
 import { type Category } from "@prisma/client";
 import { EventsFilter } from "./EventsFilter";
+import { EditEventButton } from "./EditEventButton";
 
 function RemoveEventButton(props: {
   projectId: string;
@@ -45,7 +46,7 @@ function RemoveEventButton(props: {
           console.error("Error removing event", error);
         }
       }}
-      className="ml-auto disabled:hidden"
+      className="disabled:hidden"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -125,6 +126,15 @@ function Event(props: {
             <h3 className="text-sm font-thin text-secondary-foreground">
               {props.event.happendAt.toLocaleString()}
             </h3>
+            <EditEventButton
+              isActive={props.isActive}
+              userId={props.userId}
+              eventId={props.event.id}
+              projectId={props.projectId}
+              setEvents={props.setEvents}
+              events={props.events}
+              event={props.event}
+            />
             <RemoveEventButton
               isActive={props.isActive}
               userId={props.userId}
@@ -227,13 +237,13 @@ function useInfiniteEventScrollWithTimelineAutoScroll({
           setHasMore(response.data!.hasMore!);
           if (Array.isArray(newEvents)) {
             if (filter) {
-              setEvents(newEvents)
+              setEvents(newEvents);
             } else {
               setEvents([...events, ...newEvents]);
             }
           } else {
             if (filter) {
-              setEvents(newEvents)
+              setEvents(newEvents);
             } else {
               setEvents([...events, newEvents]);
             }
