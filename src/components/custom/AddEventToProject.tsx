@@ -17,12 +17,20 @@ import { DateTimePicker } from "../ui/time-picker";
 import { type EventAndAuthor } from "~/app/dashboard/[projectId]/page";
 import { AddCategoryToPost } from "./AddCategoryToPost";
 import { type $Enums } from "@prisma/client";
+import { Loader2 } from "lucide-react";
 
 function SubmitButton() {
   const status = useFormStatus();
   return (
     <Button type="submit" disabled={status.pending}>
-      Add event
+      {status.pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <span>Adding...</span>
+        </>
+      ) : (
+        "Add event"
+      )}
     </Button>
   );
 }
