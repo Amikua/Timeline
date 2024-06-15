@@ -14,12 +14,20 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { addProjectAction } from "~/components/custom/actions";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import { Loader2 } from "lucide-react";
 
 function SubmitButton() {
   const status = useFormStatus();
   return (
     <Button type="submit" disabled={status.pending}>
-      Add project
+        {status.pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <span>Adding...</span>
+        </>
+      ) : (
+        "Add project"
+      )}
     </Button>
   );
 };
