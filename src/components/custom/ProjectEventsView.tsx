@@ -212,6 +212,34 @@ function useInfiniteEventScrollWithTimelineAutoScroll({
         setCurrentDate(date);
       }
 
+      if (filter) {
+        const response = await getAllProjectEventsWithFilter({
+          projectId: projectId,
+          filter: filter,
+        });
+        const newEvents = response.data!.events!;
+        setHasMore(false);
+        setEvents(newEvents);
+        return;
+      }
+      
+      if (!filter && !lastItem && !isFetchingNextPage && !filteredEvents.length && hasMore) {
+        setIsFetchingNextPage(true);
+        try {
+          const response = await getProjectEvents({
+            projectId: projectId,
+            offset: events.length,
+          });
+          const newEvents = response.data!.events!;
+          setHasMore(response.data!.hasMore!);
+          setEvents(newEvents)
+        } catch (error) {
+          console.error("Error fetching next page", error);
+        } finally {
+          setIsFetchingNextPage(false);
+        }
+      }
+
       if (!lastItem) {
         return;
       }
@@ -220,29 +248,25 @@ function useInfiniteEventScrollWithTimelineAutoScroll({
         lastItem.index >= filteredEvents.length - 1 &&
         !isFetchingNextPage &&
         hasMore &&
-        filteredEvents.length
+        filteredEvents.length &&
+        !filter
       ) {
         setIsFetchingNextPage(true);
         try {
-          const response = filter
-            ? await getAllProjectEventsWithFilter({
-                projectId: projectId,
-                filter: filter,
-              })
-            : await getProjectEvents({
-                projectId: projectId,
-                offset: events.length,
-              });
+          const response = await getProjectEvents({
+            projectId: projectId,
+            offset: events.length,
+          });
           const newEvents = response.data!.events!;
           setHasMore(response.data!.hasMore!);
           if (Array.isArray(newEvents)) {
-            if (filter) {
+            if (new Set(events.map(e => e.category)).size === 1) {
               setEvents(newEvents);
             } else {
               setEvents([...events, ...newEvents]);
             }
           } else {
-            if (filter) {
+            if (new Set(events.map(e => e.category)).size === 1) {
               setEvents(newEvents);
             } else {
               setEvents([...events, newEvents]);
