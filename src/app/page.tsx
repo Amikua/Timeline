@@ -89,7 +89,7 @@ export default async function Page() {
               </div>
               <div className="grid gap-1">
                 <h3 className="text-lg font-bold">
-                  Integrations and Automation&apos;s
+                  Integrations and Automation
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Connect your favorite tools and automate the logging of
