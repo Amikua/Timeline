@@ -20,7 +20,7 @@ export default async function RootLayout({
   return (
     <div className="relative flex h-full w-full max-w-full">
       <Sidebar user={user} />
-      <main className="relative max-h-full min-h-full min-w-0  flex-1 overflow-hidden rounded-sm p-2">
+      <main className="relative max-h-full min-h-full min-w-0 flex-1 overflow-hidden">
         {children}
       </main>
     </div>

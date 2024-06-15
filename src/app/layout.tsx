@@ -1,11 +1,24 @@
 import "~/styles/globals.css";
 
 import type { Metadata } from "next";
-import { Open_Sans } from "next/font/google";
+import { Chivo, Judson, Open_Sans } from "next/font/google";
 import { ThemeProvider } from "~/components/ui/theme-provider";
 
 const inter = Open_Sans({
   subsets: ["latin"],
+});
+
+const judson = Judson({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-judson",
+  weight: "400",
+});
+
+const chivo = Chivo({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-chivo",
 });
 
 export const metadata: Metadata = {
@@ -20,16 +33,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-background text-foreground dark:dark`}>
+      <body
+        className={`${inter.className + '' + judson.variable + '' + chivo.variable} dark:dark bg-background text-foreground font-[Inter]`}
+      >
         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
-    </html >
+    </html>
   );
 }
